@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Demand Mirage - Sunrise DemandOps</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page">
+    <header class="navbar navbar-expand-md d-print-none">
+      <div class="container-xl">
+        <div class="navbar-brand">
+          <span class="avatar avatar-sm bg-primary-lt me-2"><i class="ti ti-chart-arrows-vertical"></i></span>
+          Sunrise DemandOps
+        </div>
+        <div class="navbar-nav flex-row order-md-last">
+          <a class="btn btn-primary" href="outputs/monday_report.csv">
+            <i class="ti ti-download me-1"></i>
+            Monday CSV
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-wrapper">
+      <div class="page-header d-print-none">
+        <div class="container-xl">
+          <div class="row g-2 align-items-center">
+            <div class="col">
+              <div class="page-pretitle">PS 5 - The Demand Mirage</div>
+              <h1 class="page-title">AI demand forecast and reorder cockpit</h1>
+            </div>
+            <div class="col-auto ms-auto">
+              <span id="data-note" class="badge bg-blue-lt"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-body">
+        <div class="container-xl">
+          <div id="metrics" class="row row-cards mb-3"></div>
+
+          <div class="row row-cards">
+            <div class="col-12 col-lg-8">
+              <div class="card">
+                <div class="card-header">
+                  <h2 class="card-title">Six-week forecast</h2>
+                </div>
+                <div class="card-body chart-box">
+                  <div id="forecast-chart"></div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-lg-4">
+              <div class="card">
+                <div class="card-header">
+                  <h2 class="card-title">Zero vs missing decision</h2>
+                </div>
+                <div class="card-body">
+                  <div id="zero-summary"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row row-cards mt-1">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <h2 class="card-title">Monday reorder recommendation</h2>
+                  <div class="card-actions">
+                    <div class="input-icon">
+                      <span class="input-icon-addon"><i class="ti ti-search"></i></span>
+                      <input id="reorder-search" class="form-control form-control-sm" placeholder="Search SKU or product">
+                    </div>
+                  </div>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-vcenter card-table table-striped table-fixed">
+                    <thead>
+                      <tr>
+                        <th>SKU</th>
+                        <th>Product</th>
+                        <th>Class</th>
+                        <th class="text-end">Position</th>
+                        <th class="text-end">6W Forecast</th>
+                        <th class="text-end">Order</th>
+                        <th class="text-end">Value</th>
+                        <th>Flags</th>
+                      </tr>
+                    </thead>
+                    <tbody id="reorder-table"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row row-cards mt-1">
+            <div class="col-12 col-xl-6">
+              <div class="card">
+                <div class="card-header">
+                  <h2 class="card-title">Diwali 2023 stockout candidates</h2>
+                  <span class="badge bg-red-lt ms-auto">Top 14</span>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-vcenter card-table table-striped">
+                    <thead>
+                      <tr>
+                        <th>Rank</th>
+                        <th>SKU</th>
+                        <th>Product</th>
+                        <th class="text-end">Deficit</th>
+                        <th class="text-end">Score</th>
+                      </tr>
+                    </thead>
+                    <tbody id="diwali-table"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-xl-6">
+              <div class="card">
+                <div class="card-header">
+                  <h2 class="card-title">SKU classification</h2>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-vcenter card-table table-striped">
+                    <thead>
+                      <tr>
+                        <th>SKU</th>
+                        <th>Product</th>
+                        <th>Class</th>
+                        <th class="text-end">Avg 12W</th>
+                        <th class="text-end">Cover</th>
+                      </tr>
+                    </thead>
+                    <tbody id="class-table"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row row-cards mt-1">
+            <div class="col-12">
+              <div class="card method-box">
+                <div class="card-body">
+                  <h2 class="card-title">Methodology that matters for judging</h2>
+                  <div id="methodology" class="row g-3"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
+  <script src="outputs.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

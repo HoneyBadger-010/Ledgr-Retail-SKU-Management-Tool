@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Reorder Recommendations{% endblock %}
+{% block page_title %}Reorder Recommendations{% endblock %}
+{% block content %}
+<div class="row row-deck row-cards mb-3">
+  <div class="col-sm-6 col-lg-3"><div class="card kpi-card kpi-primary"><div class="card-body"><div class="subheader" style="color:var(--sunrise-primary)">Total Order Value</div><div class="h2 mt-1" id="ro-total">--</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card kpi-card kpi-success"><div class="card-body"><div class="subheader text-success">SKUs to Order</div><div class="h2 mt-1" id="ro-count">--</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card kpi-card kpi-danger"><div class="card-body"><div class="subheader text-danger">Urgent (Stockout Risk)</div><div class="h2 mt-1" id="ro-urgent">--</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card kpi-card kpi-warning"><div class="card-body"><div class="subheader text-warning">Shelf-Life Constrained</div><div class="h2 mt-1" id="ro-shelf">--</div></div></div></div>
+</div>
+<div class="row mb-3">
+  <div class="col-12"><div class="card">
+    <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div class="btn-group" role="group">
+        <button class="btn btn-outline-primary active" onclick="filterReorder('All',this)">All</button>
+        <button class="btn btn-outline-danger" onclick="filterReorder('STOCKOUT_RISK',this)">Urgent</button>
+        <button class="btn btn-outline-warning" onclick="filterReorder('SHELF_LIFE',this)">Shelf-Life</button>
+        <button class="btn btn-outline-secondary" onclick="filterReorder('OVERSTOCK_RISK',this)">Overstock</button>
+        <button class="btn btn-outline-purple" style="border-color:#8b5cf6;color:#8b5cf6" onclick="filterReorder('PERISHABLE',this)">Perishable</button>
+      </div>
+      <a href="/api/download-reorder" class="btn btn-green"><i class="ti ti-download me-1"></i>Download CSV</a>
+    </div>
+    <div class="table-responsive" style="max-height:500px;overflow-y:auto">
+      <table class="table table-vcenter table-hover"><thead><tr>
+        <th>SKU</th><th>Category</th><th>Stock</th><th>Weeks Cover</th><th>6W Forecast</th><th>Reorder Qty</th><th>Order Value</th><th>Lead Time</th><th>Flags</th><th></th>
+      </tr></thead><tbody id="reorder-table"></tbody></table>
+    </div>
+  </div></div>
+</div>
+<div class="modal modal-blur fade" id="reason-modal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content" style="border-radius:16px;overflow:hidden">
+  <div class="modal-header" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff"><h5 class="modal-title" id="reason-title" style="color:#fff">Reorder Reasoning</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body"><div id="reason-body" class="reason-text" style="font-size:14px"></div></div>
+</div></div></div>
+{% endblock %}
+{% block scripts %}
+<script>
+let allReorder=[];let currentFilter='All';
+function flagBadge(f){
+  const map={STOCKOUT_RISK:'bg-danger',OVERSTOCK_RISK:'bg-warning',SHELF_LIFE_CONSTRAINED:'bg-orange',
+    PERISHABLE:'bg-purple',DEAD_STOCK:'bg-dark',LEAD_TIME_RISK:'bg-cyan',OK:'bg-muted'};
+  return f.split('|').map(x=>`<span class="badge ${map[x]||'bg-secondary'} me-1">${x.replace(/_/g,' ')}</span>`).join('');
+}
+function renderTable(data){
+  const tb=document.getElementById('reorder-table');tb.innerHTML='';
+  data.forEach((r,i)=>{
+    const wosColor=r.weeks_of_stock<2?'text-danger fw-bold':r.weeks_of_stock<4?'text-warning fw-bold':'text-success';
+    tb.innerHTML+=`<tr style="animation:fadeUp ${0.2+i*0.03}s ease forwards">
+      <td><strong>${r.product_name||''}</strong><br><small class="text-secondary">${r.sku_id}</small></td>
+      <td><span class="badge bg-blue">${r.category||''}</span></td><td>${r.available_stock}</td>
+      <td class="${wosColor}">${r.weeks_of_stock}w</td>
+      <td>${r.forecast_6w_total}</td><td><strong style="font-size:15px">${r.final_reorder_qty}</strong></td>
+      <td style="font-weight:600">Rs.${(r.order_value_inr||0).toLocaleString('en-IN')}</td><td>${r.supplier_lead_time_days}d</td>
+      <td>${flagBadge(r.flags||'')}</td>
+      <td><button class="btn btn-sm btn-outline-primary" style="border-radius:8px" onclick="showReason(${i})"><i class="ti ti-info-circle"></i></button></td>
+    </tr>`;
+  });
+}
+function showReason(i){
+  const data=currentFilter==='All'?allReorder:allReorder.filter(r=>(r.flags||'').includes(currentFilter));
+  const r=data[i];if(!r)return;
+  document.getElementById('reason-title').textContent=r.product_name+' -- '+r.sku_id;
+  document.getElementById('reason-body').textContent=r.reason_text||'No reason available';
+  new bootstrap.Modal(document.getElementById('reason-modal')).show();
+}
+async function filterReorder(flag,btn){
+  currentFilter=flag;
+  document.querySelectorAll('.btn-group .btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  const filtered=flag==='All'?allReorder:allReorder.filter(r=>(r.flags||'').includes(flag));
+  renderTable(filtered);
+}
+async function loadReorder(){
+  allReorder=await(await fetch('/api/reorder-recommendations')).json();
+  const toOrder=allReorder.filter(r=>r.final_reorder_qty>0);
+  const urgent=allReorder.filter(r=>(r.flags||'').includes('STOCKOUT_RISK'));
+  const shelf=allReorder.filter(r=>(r.flags||'').includes('SHELF_LIFE'));
+  document.getElementById('ro-total').textContent='Rs.'+toOrder.reduce((a,r)=>a+(r.order_value_inr||0),0).toLocaleString('en-IN');
+  document.getElementById('ro-count').textContent=toOrder.length;
+  document.getElementById('ro-urgent').textContent=urgent.length;
+  document.getElementById('ro-shelf').textContent=shelf.length;
+  renderTable(allReorder);
+}
+loadReorder();
+</script>
+{% endblock %}

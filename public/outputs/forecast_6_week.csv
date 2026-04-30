@@ -1,0 +1,241 @@
+sku_id,product_name,category,week_start_date,forecast_units,low_units,high_units
+SKU-001,Shampoo 200ml,personal_care,2024-01-01,519,365,673
+SKU-001,Shampoo 200ml,personal_care,2024-01-08,525,372,679
+SKU-001,Shampoo 200ml,personal_care,2024-01-15,505,351,658
+SKU-001,Shampoo 200ml,personal_care,2024-01-22,506,352,659
+SKU-001,Shampoo 200ml,personal_care,2024-01-29,502,348,656
+SKU-001,Shampoo 200ml,personal_care,2024-02-05,494,341,648
+SKU-002,Shampoo 400ml,personal_care,2024-01-01,381,250,513
+SKU-002,Shampoo 400ml,personal_care,2024-01-08,397,266,528
+SKU-002,Shampoo 400ml,personal_care,2024-01-15,390,259,521
+SKU-002,Shampoo 400ml,personal_care,2024-01-22,388,257,519
+SKU-002,Shampoo 400ml,personal_care,2024-01-29,385,254,516
+SKU-002,Shampoo 400ml,personal_care,2024-02-05,372,241,503
+SKU-003,Conditioner 200ml,personal_care,2024-01-01,359,245,472
+SKU-003,Conditioner 200ml,personal_care,2024-01-08,372,258,486
+SKU-003,Conditioner 200ml,personal_care,2024-01-15,356,242,470
+SKU-003,Conditioner 200ml,personal_care,2024-01-22,358,244,472
+SKU-003,Conditioner 200ml,personal_care,2024-01-29,364,250,478
+SKU-003,Conditioner 200ml,personal_care,2024-02-05,367,253,481
+SKU-004,Body Wash 250ml,personal_care,2024-01-01,322,228,416
+SKU-004,Body Wash 250ml,personal_care,2024-01-08,307,213,401
+SKU-004,Body Wash 250ml,personal_care,2024-01-15,308,214,402
+SKU-004,Body Wash 250ml,personal_care,2024-01-22,304,210,398
+SKU-004,Body Wash 250ml,personal_care,2024-01-29,306,212,400
+SKU-004,Body Wash 250ml,personal_care,2024-02-05,301,206,395
+SKU-005,Face Wash 100ml,personal_care,2024-01-01,581,428,735
+SKU-005,Face Wash 100ml,personal_care,2024-01-08,539,386,693
+SKU-005,Face Wash 100ml,personal_care,2024-01-15,540,387,694
+SKU-005,Face Wash 100ml,personal_care,2024-01-22,558,405,712
+SKU-005,Face Wash 100ml,personal_care,2024-01-29,543,389,696
+SKU-005,Face Wash 100ml,personal_care,2024-02-05,547,393,700
+SKU-006,Moisturiser 100g,personal_care,2024-01-01,41,30,53
+SKU-006,Moisturiser 100g,personal_care,2024-01-08,38,26,49
+SKU-006,Moisturiser 100g,personal_care,2024-01-15,44,32,56
+SKU-006,Moisturiser 100g,personal_care,2024-01-22,46,34,57
+SKU-006,Moisturiser 100g,personal_care,2024-01-29,41,30,53
+SKU-006,Moisturiser 100g,personal_care,2024-02-05,39,28,51
+SKU-007,Sunscreen 50g,personal_care,2024-01-01,149,93,206
+SKU-007,Sunscreen 50g,personal_care,2024-01-08,149,93,206
+SKU-007,Sunscreen 50g,personal_care,2024-01-15,144,87,200
+SKU-007,Sunscreen 50g,personal_care,2024-01-22,142,85,198
+SKU-007,Sunscreen 50g,personal_care,2024-01-29,148,92,205
+SKU-007,Sunscreen 50g,personal_care,2024-02-05,139,83,196
+SKU-008,Hair Oil 100ml,personal_care,2024-01-01,335,215,456
+SKU-008,Hair Oil 100ml,personal_care,2024-01-08,319,198,440
+SKU-008,Hair Oil 100ml,personal_care,2024-01-15,323,202,444
+SKU-008,Hair Oil 100ml,personal_care,2024-01-22,320,199,441
+SKU-008,Hair Oil 100ml,personal_care,2024-01-29,322,201,443
+SKU-008,Hair Oil 100ml,personal_care,2024-02-05,318,197,439
+SKU-009,Talc Powder 100g,personal_care,2024-01-01,59,43,76
+SKU-009,Talc Powder 100g,personal_care,2024-01-08,54,38,71
+SKU-009,Talc Powder 100g,personal_care,2024-01-15,52,35,68
+SKU-009,Talc Powder 100g,personal_care,2024-01-22,59,42,76
+SKU-009,Talc Powder 100g,personal_care,2024-01-29,54,38,71
+SKU-009,Talc Powder 100g,personal_care,2024-02-05,52,36,69
+SKU-010,Lip Balm 10g,personal_care,2024-01-01,266,179,352
+SKU-010,Lip Balm 10g,personal_care,2024-01-08,266,180,353
+SKU-010,Lip Balm 10g,personal_care,2024-01-15,263,177,350
+SKU-010,Lip Balm 10g,personal_care,2024-01-22,258,172,344
+SKU-010,Lip Balm 10g,personal_care,2024-01-29,268,181,354
+SKU-010,Lip Balm 10g,personal_care,2024-02-05,265,178,351
+SKU-011,Dish Wash 500ml,household,2024-01-01,294,246,342
+SKU-011,Dish Wash 500ml,household,2024-01-08,311,263,359
+SKU-011,Dish Wash 500ml,household,2024-01-15,309,261,357
+SKU-011,Dish Wash 500ml,household,2024-01-22,308,260,356
+SKU-011,Dish Wash 500ml,household,2024-01-29,310,262,358
+SKU-011,Dish Wash 500ml,household,2024-02-05,320,272,368
+SKU-012,Floor Cleaner 1L,household,2024-01-01,385,265,505
+SKU-012,Floor Cleaner 1L,household,2024-01-08,393,272,513
+SKU-012,Floor Cleaner 1L,household,2024-01-15,399,279,520
+SKU-012,Floor Cleaner 1L,household,2024-01-22,388,268,509
+SKU-012,Floor Cleaner 1L,household,2024-01-29,362,242,483
+SKU-012,Floor Cleaner 1L,household,2024-02-05,404,283,524
+SKU-013,Toilet Cleaner 500ml,household,2024-01-01,397,318,475
+SKU-013,Toilet Cleaner 500ml,household,2024-01-08,403,324,482
+SKU-013,Toilet Cleaner 500ml,household,2024-01-15,412,334,491
+SKU-013,Toilet Cleaner 500ml,household,2024-01-22,409,330,487
+SKU-013,Toilet Cleaner 500ml,household,2024-01-29,393,314,472
+SKU-013,Toilet Cleaner 500ml,household,2024-02-05,381,302,460
+SKU-014,Glass Cleaner 500ml,household,2024-01-01,243,181,304
+SKU-014,Glass Cleaner 500ml,household,2024-01-08,235,174,296
+SKU-014,Glass Cleaner 500ml,household,2024-01-15,232,171,293
+SKU-014,Glass Cleaner 500ml,household,2024-01-22,229,168,291
+SKU-014,Glass Cleaner 500ml,household,2024-01-29,232,171,294
+SKU-014,Glass Cleaner 500ml,household,2024-02-05,235,174,297
+SKU-015,Fabric Softener 1L,household,2024-01-01,236,169,303
+SKU-015,Fabric Softener 1L,household,2024-01-08,240,173,306
+SKU-015,Fabric Softener 1L,household,2024-01-15,236,169,302
+SKU-015,Fabric Softener 1L,household,2024-01-22,247,180,313
+SKU-015,Fabric Softener 1L,household,2024-01-29,247,180,313
+SKU-015,Fabric Softener 1L,household,2024-02-05,241,174,307
+SKU-016,Air Freshener 300ml,household,2024-01-01,495,298,692
+SKU-016,Air Freshener 300ml,household,2024-01-08,487,290,684
+SKU-016,Air Freshener 300ml,household,2024-01-15,477,280,674
+SKU-016,Air Freshener 300ml,household,2024-01-22,479,282,676
+SKU-016,Air Freshener 300ml,household,2024-01-29,489,292,686
+SKU-016,Air Freshener 300ml,household,2024-02-05,456,259,653
+SKU-017,Mosquito Repellent,household,2024-01-01,516,366,666
+SKU-017,Mosquito Repellent,household,2024-01-08,511,361,661
+SKU-017,Mosquito Repellent,household,2024-01-15,504,354,653
+SKU-017,Mosquito Repellent,household,2024-01-22,505,355,655
+SKU-017,Mosquito Repellent,household,2024-01-29,473,324,623
+SKU-017,Mosquito Repellent,household,2024-02-05,474,324,623
+SKU-018,Dishwasher Tabs 20,household,2024-01-01,580,450,710
+SKU-018,Dishwasher Tabs 20,household,2024-01-08,591,461,721
+SKU-018,Dishwasher Tabs 20,household,2024-01-15,564,434,694
+SKU-018,Dishwasher Tabs 20,household,2024-01-22,572,442,702
+SKU-018,Dishwasher Tabs 20,household,2024-01-29,586,457,716
+SKU-018,Dishwasher Tabs 20,household,2024-02-05,567,437,697
+SKU-019,Laundry Bar 250g,household,2024-01-01,289,197,381
+SKU-019,Laundry Bar 250g,household,2024-01-08,296,204,388
+SKU-019,Laundry Bar 250g,household,2024-01-15,308,216,400
+SKU-019,Laundry Bar 250g,household,2024-01-22,298,206,390
+SKU-019,Laundry Bar 250g,household,2024-01-29,299,207,391
+SKU-019,Laundry Bar 250g,household,2024-02-05,300,208,392
+SKU-020,Surface Spray 500ml,household,2024-01-01,85,62,109
+SKU-020,Surface Spray 500ml,household,2024-01-08,83,60,106
+SKU-020,Surface Spray 500ml,household,2024-01-15,85,62,108
+SKU-020,Surface Spray 500ml,household,2024-01-22,83,60,106
+SKU-020,Surface Spray 500ml,household,2024-01-29,80,57,103
+SKU-020,Surface Spray 500ml,household,2024-02-05,87,64,110
+SKU-021,Biscuits 200g,packaged_food,2024-01-01,175,52,298
+SKU-021,Biscuits 200g,packaged_food,2024-01-08,174,51,297
+SKU-021,Biscuits 200g,packaged_food,2024-01-15,180,57,303
+SKU-021,Biscuits 200g,packaged_food,2024-01-22,174,51,297
+SKU-021,Biscuits 200g,packaged_food,2024-01-29,175,52,298
+SKU-021,Biscuits 200g,packaged_food,2024-02-05,174,51,297
+SKU-022,Chips 50g,packaged_food,2024-01-01,351,132,571
+SKU-022,Chips 50g,packaged_food,2024-01-08,332,112,551
+SKU-022,Chips 50g,packaged_food,2024-01-15,332,112,551
+SKU-022,Chips 50g,packaged_food,2024-01-22,324,105,544
+SKU-022,Chips 50g,packaged_food,2024-01-29,322,102,541
+SKU-022,Chips 50g,packaged_food,2024-02-05,303,83,522
+SKU-023,Namkeen 150g,packaged_food,2024-01-01,55,13,97
+SKU-023,Namkeen 150g,packaged_food,2024-01-08,50,8,92
+SKU-023,Namkeen 150g,packaged_food,2024-01-15,44,2,87
+SKU-023,Namkeen 150g,packaged_food,2024-01-22,47,5,89
+SKU-023,Namkeen 150g,packaged_food,2024-01-29,47,5,89
+SKU-023,Namkeen 150g,packaged_food,2024-02-05,48,6,90
+SKU-024,Instant Noodles,packaged_food,2024-01-01,166,68,264
+SKU-024,Instant Noodles,packaged_food,2024-01-08,159,61,256
+SKU-024,Instant Noodles,packaged_food,2024-01-15,157,59,255
+SKU-024,Instant Noodles,packaged_food,2024-01-22,148,50,246
+SKU-024,Instant Noodles,packaged_food,2024-01-29,151,53,249
+SKU-024,Instant Noodles,packaged_food,2024-02-05,153,55,251
+SKU-025,Ketchup 500g,packaged_food,2024-01-01,218,89,346
+SKU-025,Ketchup 500g,packaged_food,2024-01-08,216,88,345
+SKU-025,Ketchup 500g,packaged_food,2024-01-15,212,83,340
+SKU-025,Ketchup 500g,packaged_food,2024-01-22,208,79,336
+SKU-025,Ketchup 500g,packaged_food,2024-01-29,204,75,332
+SKU-025,Ketchup 500g,packaged_food,2024-02-05,203,75,332
+SKU-026,Jam 500g,packaged_food,2024-01-01,158,62,254
+SKU-026,Jam 500g,packaged_food,2024-01-08,160,64,256
+SKU-026,Jam 500g,packaged_food,2024-01-15,146,50,242
+SKU-026,Jam 500g,packaged_food,2024-01-22,149,53,245
+SKU-026,Jam 500g,packaged_food,2024-01-29,152,56,248
+SKU-026,Jam 500g,packaged_food,2024-02-05,149,53,245
+SKU-027,Honey 500g,packaged_food,2024-01-01,293,190,395
+SKU-027,Honey 500g,packaged_food,2024-01-08,293,191,396
+SKU-027,Honey 500g,packaged_food,2024-01-15,301,199,404
+SKU-027,Honey 500g,packaged_food,2024-01-22,280,177,382
+SKU-027,Honey 500g,packaged_food,2024-01-29,272,169,374
+SKU-027,Honey 500g,packaged_food,2024-02-05,287,184,389
+SKU-028,Coffee 200g,packaged_food,2024-01-01,523,178,869
+SKU-028,Coffee 200g,packaged_food,2024-01-08,488,143,834
+SKU-028,Coffee 200g,packaged_food,2024-01-15,527,181,872
+SKU-028,Coffee 200g,packaged_food,2024-01-22,500,155,846
+SKU-028,Coffee 200g,packaged_food,2024-01-29,485,140,831
+SKU-028,Coffee 200g,packaged_food,2024-02-05,493,148,839
+SKU-029,Tea 250g,packaged_food,2024-01-01,166,62,269
+SKU-029,Tea 250g,packaged_food,2024-01-08,165,61,268
+SKU-029,Tea 250g,packaged_food,2024-01-15,159,56,263
+SKU-029,Tea 250g,packaged_food,2024-01-22,156,52,260
+SKU-029,Tea 250g,packaged_food,2024-01-29,152,48,256
+SKU-029,Tea 250g,packaged_food,2024-02-05,150,47,254
+SKU-030,Atta 5kg,packaged_food,2024-01-01,184,67,301
+SKU-030,Atta 5kg,packaged_food,2024-01-08,176,59,293
+SKU-030,Atta 5kg,packaged_food,2024-01-15,183,66,300
+SKU-030,Atta 5kg,packaged_food,2024-01-22,172,55,289
+SKU-030,Atta 5kg,packaged_food,2024-01-29,168,51,285
+SKU-030,Atta 5kg,packaged_food,2024-02-05,164,47,282
+SKU-031,Rice 5kg,packaged_food,2024-01-01,210,94,327
+SKU-031,Rice 5kg,packaged_food,2024-01-08,208,91,324
+SKU-031,Rice 5kg,packaged_food,2024-01-15,208,91,324
+SKU-031,Rice 5kg,packaged_food,2024-01-22,200,83,316
+SKU-031,Rice 5kg,packaged_food,2024-01-29,196,79,312
+SKU-031,Rice 5kg,packaged_food,2024-02-05,181,64,297
+SKU-032,Dal 1kg,packaged_food,2024-01-01,580,322,839
+SKU-032,Dal 1kg,packaged_food,2024-01-08,553,294,811
+SKU-032,Dal 1kg,packaged_food,2024-01-15,560,302,819
+SKU-032,Dal 1kg,packaged_food,2024-01-22,552,293,811
+SKU-032,Dal 1kg,packaged_food,2024-01-29,528,269,786
+SKU-032,Dal 1kg,packaged_food,2024-02-05,551,292,809
+SKU-033,Cooking Oil 1L,packaged_food,2024-01-01,44,15,74
+SKU-033,Cooking Oil 1L,packaged_food,2024-01-08,44,15,74
+SKU-033,Cooking Oil 1L,packaged_food,2024-01-15,44,14,73
+SKU-033,Cooking Oil 1L,packaged_food,2024-01-22,40,11,70
+SKU-033,Cooking Oil 1L,packaged_food,2024-01-29,42,12,71
+SKU-033,Cooking Oil 1L,packaged_food,2024-02-05,40,11,70
+SKU-034,Ghee 500g,packaged_food,2024-01-01,650,298,1002
+SKU-034,Ghee 500g,packaged_food,2024-01-08,640,288,992
+SKU-034,Ghee 500g,packaged_food,2024-01-15,636,284,988
+SKU-034,Ghee 500g,packaged_food,2024-01-22,620,268,972
+SKU-034,Ghee 500g,packaged_food,2024-01-29,613,261,965
+SKU-034,Ghee 500g,packaged_food,2024-02-05,608,256,960
+SKU-035,Vinegar 500ml,packaged_food,2024-01-01,123,38,208
+SKU-035,Vinegar 500ml,packaged_food,2024-01-08,112,27,197
+SKU-035,Vinegar 500ml,packaged_food,2024-01-15,112,27,197
+SKU-035,Vinegar 500ml,packaged_food,2024-01-22,112,27,197
+SKU-035,Vinegar 500ml,packaged_food,2024-01-29,107,22,193
+SKU-035,Vinegar 500ml,packaged_food,2024-02-05,112,27,197
+SKU-036,Soya Sauce 200ml,packaged_food,2024-01-01,139,79,199
+SKU-036,Soya Sauce 200ml,packaged_food,2024-01-08,138,78,198
+SKU-036,Soya Sauce 200ml,packaged_food,2024-01-15,142,82,202
+SKU-036,Soya Sauce 200ml,packaged_food,2024-01-22,139,79,199
+SKU-036,Soya Sauce 200ml,packaged_food,2024-01-29,127,67,187
+SKU-036,Soya Sauce 200ml,packaged_food,2024-02-05,136,76,196
+SKU-037,Protein Bar 60g,packaged_food,2024-01-01,349,139,559
+SKU-037,Protein Bar 60g,packaged_food,2024-01-08,359,149,569
+SKU-037,Protein Bar 60g,packaged_food,2024-01-15,344,135,554
+SKU-037,Protein Bar 60g,packaged_food,2024-01-22,330,120,540
+SKU-037,Protein Bar 60g,packaged_food,2024-01-29,319,109,529
+SKU-037,Protein Bar 60g,packaged_food,2024-02-05,333,123,543
+SKU-038,Oats 500g,packaged_food,2024-01-01,529,247,811
+SKU-038,Oats 500g,packaged_food,2024-01-08,509,227,790
+SKU-038,Oats 500g,packaged_food,2024-01-15,511,229,792
+SKU-038,Oats 500g,packaged_food,2024-01-22,478,196,759
+SKU-038,Oats 500g,packaged_food,2024-01-29,488,207,770
+SKU-038,Oats 500g,packaged_food,2024-02-05,474,192,756
+SKU-039,Cornflakes 500g,packaged_food,2024-01-01,101,32,169
+SKU-039,Cornflakes 500g,packaged_food,2024-01-08,107,38,175
+SKU-039,Cornflakes 500g,packaged_food,2024-01-15,100,32,169
+SKU-039,Cornflakes 500g,packaged_food,2024-01-22,102,33,170
+SKU-039,Cornflakes 500g,packaged_food,2024-01-29,101,33,170
+SKU-039,Cornflakes 500g,packaged_food,2024-02-05,100,31,168
+SKU-040,Muesli 500g,packaged_food,2024-01-01,596,232,960
+SKU-040,Muesli 500g,packaged_food,2024-01-08,577,213,941
+SKU-040,Muesli 500g,packaged_food,2024-01-15,537,173,901
+SKU-040,Muesli 500g,packaged_food,2024-01-22,534,170,898
+SKU-040,Muesli 500g,packaged_food,2024-01-29,558,193,922
+SKU-040,Muesli 500g,packaged_food,2024-02-05,516,152,881

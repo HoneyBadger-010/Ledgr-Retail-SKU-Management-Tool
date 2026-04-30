@@ -1,0 +1,7 @@
+metric,value
+total_possible_outlet_sku_weeks,1996800
+observed_rows,93600
+missing_combinations,1903200
+missing_outlet_report,292040
+true_zero,845648
+not_carried,765512

@@ -1,0 +1,15 @@
+rank,sku_id,product_name,category,pre_diwali_baseline_2023,diwali_2022_uplift_ratio,expected_peak_2023_units,observed_peak_2023_units,demand_deficit_units,demand_deficit_pct,stockout_score,decision,reason
+1,SKU-008,Hair Oil 100ml,personal_care,331.5,2.72,903,668,235,26,31.49,stockout_candidate,Observed Diwali 2023 peak under-shot expected peak from Diwali 2022 uplift.
+2,SKU-011,Dish Wash 500ml,household,294.5,2.64,778.6,596,182.6,23.5,28.67,stockout_candidate,Observed Diwali 2023 peak under-shot expected peak from Diwali 2022 uplift.
+3,SKU-009,Talc Powder 100g,personal_care,52,2.85,148.2,113,35.2,23.8,27.34,stockout_candidate,Observed Diwali 2023 peak under-shot expected peak from Diwali 2022 uplift.
+4,SKU-040,Muesli 500g,packaged_food,534,3.5,1866.8,1469,397.8,21.3,27.3,stockout_candidate,Observed Diwali 2023 peak under-shot expected peak from Diwali 2022 uplift.
+5,SKU-018,Dishwasher Tabs 20,household,542.5,2.64,1434.2,1180,254.2,17.7,23.27,stockout_candidate,Observed Diwali 2023 peak under-shot expected peak from Diwali 2022 uplift.
+6,SKU-027,Honey 500g,packaged_food,261.5,3.28,858.8,719,139.8,16.3,21.23,stockout_candidate,Observed Diwali 2023 peak under-shot expected peak from Diwali 2022 uplift.
+7,SKU-016,Air Freshener 300ml,household,515,2.36,1216.5,1066,150.5,12.4,17.39,stockout_candidate,Observed Diwali 2023 peak under-shot expected peak from Diwali 2022 uplift.
+8,SKU-031,Rice 5kg,packaged_food,195.5,3.3,645,576,69,10.7,14.95,stockout_candidate,Observed Diwali 2023 peak under-shot expected peak from Diwali 2022 uplift.
+9,SKU-007,Sunscreen 50g,personal_care,156,2.27,353.7,315,38.7,10.9,14.62,stockout_candidate,Observed Diwali 2023 peak under-shot expected peak from Diwali 2022 uplift.
+10,SKU-006,Moisturiser 100g,personal_care,36,3.11,112.1,103,9.1,8.1,10.44,stockout_candidate,Observed Diwali 2023 peak under-shot expected peak from Diwali 2022 uplift.
+11,SKU-032,Dal 1kg,packaged_food,493,3.59,1768.5,1669,99.5,5.6,10.23,stockout_candidate,Observed Diwali 2023 peak under-shot expected peak from Diwali 2022 uplift.
+12,SKU-036,Soya Sauce 200ml,packaged_food,121.5,3.16,384.4,362,22.4,5.8,8.97,stockout_candidate,Observed Diwali 2023 peak under-shot expected peak from Diwali 2022 uplift.
+13,SKU-019,Laundry Bar 250g,household,281.5,2.35,660.8,628,32.8,5,8.49,stockout_candidate,Observed Diwali 2023 peak under-shot expected peak from Diwali 2022 uplift.
+14,SKU-028,Coffee 200g,packaged_food,463.5,3.05,1415.9,1371,44.9,3.2,7,stockout_candidate,Observed Diwali 2023 peak under-shot expected peak from Diwali 2022 uplift.

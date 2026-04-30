@@ -1,0 +1,12 @@
+{
+  "name": "demand-mirage",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SKU-level demand forecasting and inventory optimization solution for PS 5 - The Demand Mirage.",
+  "scripts": {
+    "generate": "node scripts/generate.js",
+    "start": "node scripts/serve.js"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

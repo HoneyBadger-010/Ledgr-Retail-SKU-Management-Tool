@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Overview Dashboard{% endblock %}
+{% block page_title %}Overview Dashboard{% endblock %}
+{% block content %}
+<div id="kpi-row" class="row row-deck row-cards mb-3">
+  <div class="col-sm-6 col-lg-3"><div class="card kpi-card kpi-danger"><div class="card-body"><div class="subheader text-danger">SKUs at Stockout Risk</div><div class="h1 mb-0 mt-2" id="kpi-stockout">--</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card kpi-card kpi-warning"><div class="card-body"><div class="subheader text-warning">SKUs Overstocked</div><div class="h1 mb-0 mt-2" id="kpi-overstock">--</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card kpi-card kpi-danger"><div class="card-body"><div class="subheader text-danger">Revenue at Risk</div><div class="h1 mb-0 mt-2" id="kpi-revenue">--</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card kpi-card kpi-primary"><div class="card-body"><div class="subheader" style="color:var(--sunrise-primary)">Total Order Value</div><div class="h1 mb-0 mt-2" id="kpi-order">--</div></div></div></div>
+</div>
+<div class="row row-deck row-cards mb-3">
+  <div class="col-lg-7"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-alert-triangle text-danger me-2"></i>Top 10 SKUs by Stockout Risk</h3></div><div class="card-body"><div id="chart-stockout" style="height:320px"><div class="loading-pulse text-center pt-5">Loading chart...</div></div></div></div></div>
+  <div class="col-lg-5"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-chart-donut me-2" style="color:var(--sunrise-primary)"></i>SKU Movement Classification</h3></div><div class="card-body"><div id="chart-classification" style="height:320px"><div class="loading-pulse text-center pt-5">Loading chart...</div></div></div></div></div>
+</div>
+<div class="row mb-3"><div class="col-12" id="alert-area"></div></div>
+<div class="row mb-3">
+  <div class="col-lg-6"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-chart-bar me-2" style="color:var(--sunrise-secondary)"></i>ABC Revenue Distribution</h3></div><div class="card-body"><div id="chart-abc" style="height:280px"><div class="loading-pulse text-center pt-5">Loading chart...</div></div></div></div></div>
+  <div class="col-lg-6"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-clock me-2" style="color:var(--sunrise-accent)"></i>Pipeline Status</h3></div><div class="card-body">
+    <div class="mb-3" id="pipeline-info" style="font-size:14px;color:#64748b"></div>
+    <button class="btn btn-primary" id="btn-rerun" onclick="rerunPipeline()"><i class="ti ti-refresh me-1"></i> Re-run Pipeline</button>
+    <span id="rerun-status" class="ms-2 fw-600"></span>
+  </div></div></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function loadOverview(){
+  const r=await fetch('/api/report');const d=await r.json();
+  if(!d.executive_summary){document.getElementById('alert-area').innerHTML='<div class="alert alert-danger">Pipeline has not completed yet. Click Re-run Pipeline.</div>';return;}
+  const e=d.executive_summary;
+  document.getElementById('kpi-stockout').textContent=e.skus_at_stockout_risk||0;
+  document.getElementById('kpi-overstock').textContent=e.skus_at_overstock_risk||0;
+  document.getElementById('kpi-revenue').textContent='Rs.'+(e.revenue_at_risk_inr||0).toLocaleString('en-IN');
+  document.getElementById('kpi-order').textContent='Rs.'+(e.total_order_value_inr||0).toLocaleString('en-IN');
+  if(e.shelf_life_violations>0){document.getElementById('alert-area').innerHTML='<div class="alert alert-danger"><i class="ti ti-alert-triangle me-2"></i>'+e.shelf_life_violations+' shelf life violations detected!</div>';}
+  else{document.getElementById('alert-area').innerHTML='<div class="alert alert-success"><i class="ti ti-circle-check me-2"></i>All systems green -- 0 shelf life violations. '+e.total_skus_analyzed+' SKUs analyzed. Report date: '+d.report_date+'</div>';}
+  document.getElementById('pipeline-info').innerHTML='<strong>'+e.total_skus_analyzed+'</strong> SKUs analyzed &bull; <strong>'+e.total_skus_to_reorder+'</strong> need reorder &bull; <strong>'+(e.dead_stock_count||0)+'</strong> dead stock';
+  // Stockout chart
+  const sa=await(await fetch('/api/stockout-analysis')).json();
+  const top10=sa.slice(0,10);
+  document.getElementById('chart-stockout').innerHTML='';
+  new ApexCharts(document.getElementById('chart-stockout'),{chart:{type:'bar',height:300,toolbar:{show:false}},series:[{name:'Stockout Score',data:top10.map(s=>s.stockout_score)}],xaxis:{categories:top10.map(s=>(s.product_name||s.sku_id).substring(0,20)),labels:{style:{fontSize:'11px',fontWeight:600}}},colors:['#ef4444'],plotOptions:{bar:{borderRadius:6,horizontal:true,barHeight:'60%'}},grid:{borderColor:'#f1f5f9'},dataLabels:{enabled:true,style:{fontSize:'12px',fontWeight:700}}}).render();
+  // Classification donut
+  const cl=await(await fetch('/api/sku-classification')).json();
+  const counts={};cl.forEach(s=>{counts[s.movement_class]=(counts[s.movement_class]||0)+1;});
+  document.getElementById('chart-classification').innerHTML='';
+  new ApexCharts(document.getElementById('chart-classification'),{chart:{type:'donut',height:300},series:Object.values(counts),labels:Object.keys(counts).map(k=>k.replace(/_/g,' ').replace(/\b\w/g,l=>l.toUpperCase())),colors:['#10b981','#f97316','#8b5cf6','#ef4444'],plotOptions:{pie:{donut:{size:'65%',labels:{show:true,total:{show:true,label:'Total SKUs',fontSize:'14px',fontWeight:700}}}}},legend:{position:'bottom',fontSize:'12px',fontWeight:600}}).render();
+  // ABC chart
+  const abc={A:{count:0,rev:0},B:{count:0,rev:0},C:{count:0,rev:0}};
+  cl.forEach(s=>{const c=s.abc_class||'C';if(abc[c]){abc[c].count++;abc[c].rev+=(s.total_revenue||0);}});
+  document.getElementById('chart-abc').innerHTML='';
+  new ApexCharts(document.getElementById('chart-abc'),{chart:{type:'bar',height:260,toolbar:{show:false}},series:[{name:'Revenue (Rs.)',data:Object.values(abc).map(a=>Math.round(a.rev))},{name:'SKU Count',data:Object.values(abc).map(a=>a.count)}],xaxis:{categories:['A-Class (Top 70%)','B-Class (70-90%)','C-Class (Tail)'],labels:{style:{fontSize:'12px',fontWeight:600}}},colors:['#6366f1','#f59e0b'],plotOptions:{bar:{borderRadius:6,columnWidth:'50%'}},grid:{borderColor:'#f1f5f9'},yaxis:[{title:{text:'Revenue'},labels:{formatter:v=>'Rs.'+Math.round(v/1000000)+'M'}},{opposite:true,title:{text:'SKUs'}}]}).render();
+}
+async function rerunPipeline(){
+  document.getElementById('rerun-status').innerHTML='<span class="loading-pulse">Running pipeline...</span>';
+  document.getElementById('btn-rerun').disabled=true;
+  const r=await fetch('/api/run-pipeline',{method:'POST'});const d=await r.json();
+  document.getElementById('rerun-status').innerHTML=d.status==='success'?'<span class="text-success fw-bold"><i class="ti ti-check"></i> Complete!</span>':'<span class="text-danger fw-bold"><i class="ti ti-x"></i> Error</span>';
+  document.getElementById('btn-rerun').disabled=false;
+  if(d.status==='success')setTimeout(loadOverview,500);
+}
+loadOverview();
+</script>
+{% endblock %}

@@ -1,0 +1,92 @@
+:root {
+  --dm-accent: #206bc4;
+  --dm-ink: #182433;
+  --dm-muted: #667382;
+  --dm-line: #dce3ea;
+  --dm-bg: #f6f8fb;
+}
+
+body {
+  background: var(--dm-bg);
+}
+
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.metric-value {
+  font-size: 1.65rem;
+  line-height: 1.1;
+  font-weight: 700;
+  color: var(--dm-ink);
+}
+
+.metric-label {
+  color: var(--dm-muted);
+  font-size: .8125rem;
+}
+
+.risk-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .2rem .5rem;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 600;
+  background: #eef3f7;
+  color: #34495e;
+  white-space: nowrap;
+}
+
+.risk-danger {
+  background: #fff1f0;
+  color: #b42318;
+}
+
+.risk-warning {
+  background: #fff7e6;
+  color: #ad6800;
+}
+
+.risk-good {
+  background: #ecfdf3;
+  color: #067647;
+}
+
+.table-fixed {
+  table-layout: fixed;
+}
+
+.table-fixed td,
+.table-fixed th {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.method-box {
+  border-left: 3px solid var(--dm-accent);
+  background: #fff;
+}
+
+.chart-box {
+  min-height: 260px;
+}
+
+.fallback-card {
+  border: 1px solid var(--dm-line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+@media (max-width: 767px) {
+  .metric-value {
+    font-size: 1.35rem;
+  }
+
+  .table-responsive {
+    font-size: .875rem;
+  }
+}

@@ -1,0 +1,41 @@
+sku_id,product_name,brand,category,subcategory,unit_price,cost_price,shelf_life_days,moq_from_supplier,supplier_lead_time_days
+SKU-001,Shampoo 200ml,Hindustan Unilever,personal_care,Shampoo,314.9,31.47,1095,6,8
+SKU-002,Shampoo 400ml,Procter & Gamble,personal_care,Shampoo,364.23,103.16,1095,6,7
+SKU-003,Conditioner 200ml,Hindustan Unilever,personal_care,Conditioner,177.27,34.8,1095,24,3
+SKU-004,Body Wash 250ml,Amul,personal_care,Body,58.66,86.28,1095,24,10
+SKU-005,Face Wash 100ml,Amul,personal_care,Face,140.92,63.56,1095,48,6
+SKU-006,Moisturiser 100g,Britannia,personal_care,Moisturiser,133.23,268.7,1095,12,9
+SKU-007,Sunscreen 50g,Nestle,personal_care,Sunscreen,217.2,108.32,1095,24,6
+SKU-008,Hair Oil 100ml,Patanjali,personal_care,Hair,269.33,261.41,1095,24,8
+SKU-009,Talc Powder 100g,Dabur,personal_care,Talc,279.87,222.14,1095,6,7
+SKU-010,Lip Balm 10g,Marico,personal_care,Lip,132.74,169.4,1095,6,10
+SKU-011,Dish Wash 500ml,Nestle,household,Dish,325.83,95.96,1095,24,6
+SKU-012,Floor Cleaner 1L,Haldiram's,household,Floor,322.2,249.95,1095,48,11
+SKU-013,Toilet Cleaner 500ml,Amul,household,Toilet,168.4,194.46,1095,48,9
+SKU-014,Glass Cleaner 500ml,Everest,household,Glass,388.86,23.4,1095,6,11
+SKU-015,Fabric Softener 1L,Amul,household,Fabric,258.29,64.66,1095,24,9
+SKU-016,Air Freshener 300ml,Britannia,household,Air,77.25,91.22,1095,12,11
+SKU-017,Mosquito Repellent,Hindustan Unilever,household,Mosquito,282.31,155.68,1095,12,3
+SKU-018,Dishwasher Tabs 20,Haldiram's,household,Dishwasher,348.79,149.99,1095,6,12
+SKU-019,Laundry Bar 250g,Britannia,household,Laundry,311.48,118.94,1095,6,8
+SKU-020,Surface Spray 500ml,Haldiram's,household,Surface,57.9,150.31,1095,12,6
+SKU-021,Biscuits 200g,Procter & Gamble,packaged_food,Biscuits,211.94,56.15,730,24,6
+SKU-022,Chips 50g,Dabur,packaged_food,Chips,237.01,151.66,730,48,3
+SKU-023,Namkeen 150g,Nestle,packaged_food,Namkeen,406.7,84.46,730,48,8
+SKU-024,Instant Noodles,Everest,packaged_food,Instant,220.82,234.76,730,12,10
+SKU-025,Ketchup 500g,Procter & Gamble,packaged_food,Ketchup,234.25,28.01,730,6,8
+SKU-026,Jam 500g,Dabur,packaged_food,Jam,127.05,25.0,730,12,5
+SKU-027,Honey 500g,ITC,packaged_food,Honey,429.2,180.26,730,48,7
+SKU-028,Coffee 200g,MDH Spices,packaged_food,Coffee,349.48,276.37,730,6,6
+SKU-029,Tea 250g,Dabur,packaged_food,Tea,54.73,46.31,730,6,12
+SKU-030,Atta 5kg,Britannia,packaged_food,Atta,238.84,190.07,730,24,5
+SKU-031,Rice 5kg,Marico,packaged_food,Rice,200.21,139.92,730,6,8
+SKU-032,Dal 1kg,Nestle,packaged_food,Dal,400.41,22.97,730,6,6
+SKU-033,Cooking Oil 1L,Amul,packaged_food,Cooking,434.35,284.13,730,6,6
+SKU-034,Ghee 500g,Procter & Gamble,packaged_food,Ghee,176.21,125.44,730,24,6
+SKU-035,Vinegar 500ml,Patanjali,packaged_food,Vinegar,186.14,157.91,730,12,9
+SKU-036,Soya Sauce 200ml,Nestle,packaged_food,Soya,202.95,273.76,730,12,8
+SKU-037,Protein Bar 60g,Procter & Gamble,packaged_food,Protein,342.43,103.02,730,12,5
+SKU-038,Oats 500g,Everest,packaged_food,Oats,345.82,56.26,730,12,8
+SKU-039,Cornflakes 500g,Amul,packaged_food,Cornflakes,116.94,105.08,730,24,5
+SKU-040,Muesli 500g,Patanjali,packaged_food,Muesli,278.12,232.95,730,12,7

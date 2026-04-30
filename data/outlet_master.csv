@@ -1,0 +1,321 @@
+outlet_id,outlet_name,outlet_type,city,area,channel
+OL-001,W Kirana,medical,Nashik,Wakad,supermarket
+OL-002,F Medical & Grocery,supermarket,Nashik,Kothrud,kirana
+OL-003,M Supermarket,supermarket,Nashik,Shivajinagar,medical
+OL-004,C Medical & Grocery,kirana,Pune,Aundh,supermarket
+OL-005,D Kirana,medical,Pune,Hadapsar,kirana
+OL-006,X Supermarket,supermarket,Pune,Shivajinagar,kirana
+OL-007,E Supermarket,kirana,Pune,Kothrud,supermarket
+OL-008,C General Store,kirana,Nashik,Nashik Road,supermarket
+OL-009,K Mart,medical,Nashik,Kothrud,medical
+OL-010,E Medical & Grocery,kirana,Pune,Kothrud,medical
+OL-011,S Kirana,kirana,Pune,Wakad,medical
+OL-012,N Supermarket,medical,Pune,Wakad,supermarket
+OL-013,M Medical & Grocery,medical,Pune,Hadapsar,medical
+OL-014,A General Store,kirana,Nashik,Kothrud,kirana
+OL-015,M Mart,kirana,Nashik,Gangapur,kirana
+OL-016,A Supermarket,medical,Pune,Shivajinagar,medical
+OL-017,H Mart,supermarket,Pune,Hadapsar,kirana
+OL-018,J Kirana,medical,Nashik,Aundh,medical
+OL-019,Z General Store,kirana,Pune,Hadapsar,supermarket
+OL-020,Y Medical & Grocery,medical,Nashik,Shivajinagar,medical
+OL-021,X Medical & Grocery,medical,Nashik,Hadapsar,supermarket
+OL-022,B General Store,kirana,Pune,Hadapsar,medical
+OL-023,B Kirana,kirana,Pune,Hadapsar,kirana
+OL-024,T Supermarket,kirana,Nashik,Hadapsar,supermarket
+OL-025,L General Store,kirana,Pune,Shivajinagar,kirana
+OL-026,T Supermarket,kirana,Pune,Shivajinagar,kirana
+OL-027,D Medical & Grocery,kirana,Pune,Gangapur,kirana
+OL-028,W Kirana,supermarket,Nashik,Nashik Road,kirana
+OL-029,Q Medical & Grocery,kirana,Nashik,Wakad,kirana
+OL-030,E Medical & Grocery,kirana,Nashik,Aundh,kirana
+OL-031,F Mart,supermarket,Nashik,Shivajinagar,kirana
+OL-032,Y Mart,medical,Pune,Gangapur,medical
+OL-033,N Supermarket,kirana,Nashik,Wakad,medical
+OL-034,Z Mart,kirana,Pune,Kothrud,medical
+OL-035,R Kirana,kirana,Pune,Kothrud,medical
+OL-036,H Kirana,supermarket,Pune,Nashik Road,supermarket
+OL-037,K Supermarket,supermarket,Nashik,Kothrud,kirana
+OL-038,D General Store,medical,Pune,Hadapsar,kirana
+OL-039,S Mart,supermarket,Pune,Gangapur,kirana
+OL-040,N Supermarket,kirana,Nashik,Shivajinagar,kirana
+OL-041,N General Store,kirana,Nashik,Shivajinagar,kirana
+OL-042,G Medical & Grocery,kirana,Nashik,Aundh,kirana
+OL-043,S General Store,kirana,Nashik,Nashik Road,medical
+OL-044,K Medical & Grocery,kirana,Nashik,Nashik Road,supermarket
+OL-045,Z Kirana,supermarket,Pune,Shivajinagar,supermarket
+OL-046,F Medical & Grocery,medical,Pune,Shivajinagar,kirana
+OL-047,P General Store,kirana,Nashik,Nashik Road,supermarket
+OL-048,U General Store,medical,Pune,Shivajinagar,medical
+OL-049,F Supermarket,kirana,Nashik,Aundh,kirana
+OL-050,T Kirana,kirana,Nashik,Nashik Road,medical
+OL-051,D Mart,kirana,Nashik,Kothrud,medical
+OL-052,Z Kirana,medical,Pune,Nashik Road,supermarket
+OL-053,A Supermarket,medical,Pune,Kothrud,kirana
+OL-054,W Kirana,supermarket,Pune,Shivajinagar,supermarket
+OL-055,J Mart,kirana,Nashik,Hadapsar,supermarket
+OL-056,V Medical & Grocery,supermarket,Pune,Wakad,kirana
+OL-057,K Kirana,medical,Pune,Wakad,supermarket
+OL-058,C Medical & Grocery,kirana,Pune,Nashik Road,kirana
+OL-059,U Medical & Grocery,kirana,Pune,Aundh,supermarket
+OL-060,W Mart,supermarket,Pune,Hadapsar,kirana
+OL-061,V General Store,kirana,Pune,Aundh,medical
+OL-062,D Kirana,kirana,Pune,Aundh,medical
+OL-063,D Mart,kirana,Nashik,Shivajinagar,supermarket
+OL-064,N Medical & Grocery,kirana,Pune,Aundh,medical
+OL-065,V Supermarket,medical,Nashik,Gangapur,medical
+OL-066,B Supermarket,kirana,Pune,Wakad,kirana
+OL-067,N Mart,supermarket,Pune,Gangapur,medical
+OL-068,U Supermarket,kirana,Nashik,Hadapsar,kirana
+OL-069,E Mart,kirana,Nashik,Aundh,medical
+OL-070,T Kirana,kirana,Pune,Shivajinagar,supermarket
+OL-071,F General Store,kirana,Pune,Kothrud,kirana
+OL-072,F General Store,supermarket,Pune,Gangapur,kirana
+OL-073,R General Store,supermarket,Pune,Nashik Road,kirana
+OL-074,G Kirana,supermarket,Pune,Wakad,medical
+OL-075,R Kirana,kirana,Nashik,Gangapur,supermarket
+OL-076,K Kirana,kirana,Nashik,Gangapur,kirana
+OL-077,Q Supermarket,kirana,Pune,Kothrud,supermarket
+OL-078,A Kirana,kirana,Pune,Hadapsar,supermarket
+OL-079,R Medical & Grocery,kirana,Pune,Kothrud,kirana
+OL-080,U Supermarket,kirana,Pune,Wakad,kirana
+OL-081,S General Store,medical,Pune,Nashik Road,medical
+OL-082,T Supermarket,supermarket,Nashik,Gangapur,kirana
+OL-083,Y Mart,medical,Pune,Kothrud,supermarket
+OL-084,Y General Store,kirana,Nashik,Hadapsar,medical
+OL-085,K Medical & Grocery,kirana,Nashik,Gangapur,supermarket
+OL-086,X General Store,supermarket,Pune,Aundh,medical
+OL-087,W Kirana,medical,Nashik,Gangapur,medical
+OL-088,B Medical & Grocery,medical,Nashik,Gangapur,kirana
+OL-089,D Mart,kirana,Pune,Wakad,kirana
+OL-090,Q Kirana,kirana,Pune,Wakad,kirana
+OL-091,B Mart,kirana,Nashik,Shivajinagar,medical
+OL-092,S Supermarket,medical,Pune,Gangapur,medical
+OL-093,V Medical & Grocery,kirana,Nashik,Nashik Road,supermarket
+OL-094,P Kirana,supermarket,Nashik,Nashik Road,kirana
+OL-095,M Kirana,medical,Pune,Shivajinagar,kirana
+OL-096,H Kirana,medical,Pune,Gangapur,supermarket
+OL-097,S Kirana,medical,Pune,Wakad,medical
+OL-098,C Supermarket,kirana,Pune,Shivajinagar,kirana
+OL-099,A Supermarket,kirana,Nashik,Shivajinagar,kirana
+OL-100,R Mart,kirana,Pune,Gangapur,supermarket
+OL-101,L Mart,kirana,Nashik,Gangapur,medical
+OL-102,J Kirana,kirana,Nashik,Aundh,medical
+OL-103,B General Store,kirana,Pune,Kothrud,supermarket
+OL-104,V Mart,supermarket,Nashik,Hadapsar,kirana
+OL-105,L Mart,medical,Nashik,Nashik Road,kirana
+OL-106,V Medical & Grocery,supermarket,Pune,Kothrud,kirana
+OL-107,Q Supermarket,supermarket,Nashik,Kothrud,kirana
+OL-108,S General Store,kirana,Pune,Nashik Road,kirana
+OL-109,X Mart,kirana,Nashik,Shivajinagar,kirana
+OL-110,A Medical & Grocery,medical,Pune,Gangapur,medical
+OL-111,P Mart,kirana,Pune,Shivajinagar,supermarket
+OL-112,X Supermarket,supermarket,Pune,Nashik Road,kirana
+OL-113,W Supermarket,medical,Nashik,Shivajinagar,kirana
+OL-114,H General Store,kirana,Nashik,Nashik Road,medical
+OL-115,P Kirana,medical,Nashik,Kothrud,medical
+OL-116,W Mart,kirana,Nashik,Hadapsar,kirana
+OL-117,L Kirana,kirana,Nashik,Wakad,kirana
+OL-118,Q Supermarket,kirana,Pune,Wakad,kirana
+OL-119,Y Supermarket,kirana,Pune,Wakad,medical
+OL-120,E Supermarket,supermarket,Pune,Nashik Road,kirana
+OL-121,Q Kirana,supermarket,Pune,Nashik Road,medical
+OL-122,P General Store,supermarket,Nashik,Shivajinagar,kirana
+OL-123,H Medical & Grocery,medical,Pune,Gangapur,medical
+OL-124,J Mart,medical,Pune,Aundh,supermarket
+OL-125,H Medical & Grocery,supermarket,Pune,Aundh,kirana
+OL-126,T Mart,medical,Nashik,Wakad,supermarket
+OL-127,C Mart,kirana,Pune,Hadapsar,kirana
+OL-128,M Supermarket,supermarket,Nashik,Gangapur,kirana
+OL-129,X General Store,kirana,Pune,Kothrud,supermarket
+OL-130,V Mart,supermarket,Nashik,Kothrud,kirana
+OL-131,R General Store,supermarket,Nashik,Shivajinagar,supermarket
+OL-132,E Supermarket,medical,Pune,Nashik Road,kirana
+OL-133,W Medical & Grocery,kirana,Pune,Wakad,kirana
+OL-134,X Medical & Grocery,kirana,Pune,Hadapsar,kirana
+OL-135,H Kirana,supermarket,Nashik,Wakad,supermarket
+OL-136,Z Medical & Grocery,kirana,Nashik,Nashik Road,kirana
+OL-137,H Mart,medical,Nashik,Hadapsar,medical
+OL-138,M Medical & Grocery,kirana,Pune,Gangapur,medical
+OL-139,Y Mart,kirana,Nashik,Nashik Road,supermarket
+OL-140,L General Store,medical,Pune,Shivajinagar,supermarket
+OL-141,C General Store,kirana,Pune,Nashik Road,supermarket
+OL-142,T Medical & Grocery,supermarket,Pune,Wakad,medical
+OL-143,B Mart,kirana,Nashik,Kothrud,kirana
+OL-144,L Mart,supermarket,Pune,Aundh,kirana
+OL-145,V Kirana,supermarket,Pune,Aundh,kirana
+OL-146,L Supermarket,kirana,Pune,Shivajinagar,supermarket
+OL-147,X Supermarket,supermarket,Pune,Wakad,kirana
+OL-148,A General Store,medical,Nashik,Aundh,kirana
+OL-149,F General Store,supermarket,Nashik,Kothrud,medical
+OL-150,C Medical & Grocery,medical,Pune,Nashik Road,medical
+OL-151,Z Supermarket,kirana,Pune,Shivajinagar,kirana
+OL-152,X Kirana,kirana,Nashik,Gangapur,kirana
+OL-153,R Supermarket,supermarket,Nashik,Wakad,medical
+OL-154,Q Kirana,medical,Pune,Wakad,supermarket
+OL-155,V Kirana,kirana,Nashik,Gangapur,supermarket
+OL-156,G Supermarket,kirana,Nashik,Wakad,medical
+OL-157,M Kirana,medical,Pune,Gangapur,supermarket
+OL-158,J Supermarket,supermarket,Nashik,Wakad,supermarket
+OL-159,C Mart,kirana,Pune,Aundh,kirana
+OL-160,P Kirana,medical,Pune,Hadapsar,kirana
+OL-161,S Kirana,kirana,Nashik,Wakad,supermarket
+OL-162,E Mart,medical,Nashik,Kothrud,supermarket
+OL-163,C Supermarket,medical,Pune,Hadapsar,medical
+OL-164,G General Store,supermarket,Nashik,Aundh,medical
+OL-165,L Supermarket,medical,Pune,Gangapur,kirana
+OL-166,L General Store,kirana,Nashik,Kothrud,kirana
+OL-167,N Medical & Grocery,medical,Nashik,Wakad,medical
+OL-168,W Mart,medical,Pune,Wakad,supermarket
+OL-169,Y Kirana,kirana,Nashik,Nashik Road,supermarket
+OL-170,N Kirana,medical,Pune,Kothrud,kirana
+OL-171,K Kirana,medical,Pune,Aundh,kirana
+OL-172,T Kirana,kirana,Nashik,Aundh,kirana
+OL-173,D Kirana,kirana,Pune,Nashik Road,kirana
+OL-174,D Mart,medical,Nashik,Hadapsar,kirana
+OL-175,T Supermarket,medical,Nashik,Aundh,kirana
+OL-176,L Supermarket,kirana,Pune,Gangapur,kirana
+OL-177,A Kirana,kirana,Pune,Hadapsar,medical
+OL-178,A Kirana,supermarket,Pune,Nashik Road,kirana
+OL-179,K General Store,kirana,Nashik,Aundh,medical
+OL-180,J Mart,supermarket,Pune,Nashik Road,medical
+OL-181,L Medical & Grocery,supermarket,Nashik,Shivajinagar,medical
+OL-182,F General Store,kirana,Nashik,Kothrud,medical
+OL-183,B General Store,kirana,Pune,Shivajinagar,kirana
+OL-184,T Mart,kirana,Pune,Shivajinagar,supermarket
+OL-185,Z Kirana,supermarket,Pune,Aundh,medical
+OL-186,F Medical & Grocery,kirana,Pune,Hadapsar,kirana
+OL-187,X General Store,kirana,Nashik,Kothrud,kirana
+OL-188,V Medical & Grocery,medical,Nashik,Wakad,supermarket
+OL-189,N Kirana,kirana,Nashik,Hadapsar,supermarket
+OL-190,Q Supermarket,kirana,Pune,Kothrud,medical
+OL-191,N Kirana,medical,Pune,Kothrud,medical
+OL-192,X Medical & Grocery,medical,Pune,Shivajinagar,kirana
+OL-193,X Supermarket,supermarket,Pune,Aundh,kirana
+OL-194,B Supermarket,kirana,Nashik,Hadapsar,supermarket
+OL-195,N General Store,medical,Pune,Kothrud,medical
+OL-196,K Kirana,medical,Pune,Kothrud,supermarket
+OL-197,U Supermarket,kirana,Pune,Shivajinagar,kirana
+OL-198,S Medical & Grocery,kirana,Nashik,Hadapsar,kirana
+OL-199,H Medical & Grocery,kirana,Pune,Hadapsar,kirana
+OL-200,D General Store,kirana,Pune,Gangapur,kirana
+OL-201,R Medical & Grocery,supermarket,Pune,Shivajinagar,kirana
+OL-202,N General Store,supermarket,Pune,Aundh,kirana
+OL-203,S Medical & Grocery,kirana,Pune,Wakad,kirana
+OL-204,U Supermarket,medical,Pune,Wakad,supermarket
+OL-205,Q General Store,kirana,Pune,Kothrud,kirana
+OL-206,A Medical & Grocery,supermarket,Pune,Gangapur,medical
+OL-207,T Medical & Grocery,kirana,Nashik,Wakad,medical
+OL-208,X Kirana,medical,Pune,Aundh,kirana
+OL-209,U Medical & Grocery,kirana,Pune,Kothrud,kirana
+OL-210,Y Kirana,supermarket,Nashik,Kothrud,medical
+OL-211,Z Supermarket,kirana,Pune,Shivajinagar,supermarket
+OL-212,J Medical & Grocery,kirana,Nashik,Hadapsar,medical
+OL-213,U Mart,medical,Pune,Hadapsar,kirana
+OL-214,G General Store,kirana,Nashik,Nashik Road,kirana
+OL-215,J Kirana,kirana,Nashik,Nashik Road,kirana
+OL-216,A Mart,kirana,Nashik,Aundh,kirana
+OL-217,Y Kirana,medical,Nashik,Shivajinagar,medical
+OL-218,X Supermarket,medical,Pune,Gangapur,kirana
+OL-219,G Kirana,supermarket,Pune,Nashik Road,medical
+OL-220,R Supermarket,kirana,Pune,Shivajinagar,kirana
+OL-221,J Supermarket,medical,Pune,Kothrud,kirana
+OL-222,D Medical & Grocery,medical,Pune,Gangapur,supermarket
+OL-223,Q Supermarket,kirana,Pune,Hadapsar,supermarket
+OL-224,N Kirana,kirana,Pune,Nashik Road,kirana
+OL-225,V General Store,kirana,Pune,Gangapur,supermarket
+OL-226,S Mart,medical,Nashik,Kothrud,medical
+OL-227,S Supermarket,supermarket,Nashik,Shivajinagar,kirana
+OL-228,R Mart,kirana,Pune,Wakad,supermarket
+OL-229,C General Store,kirana,Nashik,Kothrud,medical
+OL-230,Y Mart,kirana,Nashik,Wakad,kirana
+OL-231,Z Kirana,medical,Pune,Shivajinagar,medical
+OL-232,V Mart,kirana,Nashik,Nashik Road,kirana
+OL-233,V Kirana,kirana,Nashik,Nashik Road,kirana
+OL-234,K Medical & Grocery,supermarket,Pune,Gangapur,kirana
+OL-235,B General Store,kirana,Nashik,Hadapsar,medical
+OL-236,S General Store,kirana,Pune,Hadapsar,kirana
+OL-237,D General Store,supermarket,Nashik,Kothrud,kirana
+OL-238,B Mart,kirana,Nashik,Hadapsar,supermarket
+OL-239,Z General Store,kirana,Pune,Aundh,medical
+OL-240,B Supermarket,kirana,Pune,Gangapur,kirana
+OL-241,G Mart,kirana,Pune,Aundh,medical
+OL-242,X Mart,kirana,Pune,Gangapur,kirana
+OL-243,E General Store,medical,Pune,Wakad,supermarket
+OL-244,T Mart,supermarket,Pune,Wakad,medical
+OL-245,E Medical & Grocery,kirana,Pune,Wakad,kirana
+OL-246,V Kirana,kirana,Nashik,Kothrud,supermarket
+OL-247,A Medical & Grocery,kirana,Pune,Nashik Road,medical
+OL-248,Y Kirana,kirana,Pune,Gangapur,supermarket
+OL-249,R Supermarket,supermarket,Pune,Gangapur,supermarket
+OL-250,X Supermarket,medical,Pune,Wakad,medical
+OL-251,U Kirana,medical,Pune,Hadapsar,kirana
+OL-252,D Mart,supermarket,Pune,Shivajinagar,kirana
+OL-253,Y General Store,kirana,Pune,Kothrud,medical
+OL-254,E Mart,supermarket,Pune,Wakad,kirana
+OL-255,U Medical & Grocery,kirana,Pune,Kothrud,kirana
+OL-256,H Mart,kirana,Nashik,Kothrud,medical
+OL-257,U Medical & Grocery,kirana,Pune,Gangapur,kirana
+OL-258,G General Store,kirana,Nashik,Aundh,supermarket
+OL-259,M Supermarket,supermarket,Pune,Wakad,medical
+OL-260,B General Store,kirana,Pune,Shivajinagar,supermarket
+OL-261,C General Store,medical,Nashik,Kothrud,supermarket
+OL-262,Q Medical & Grocery,kirana,Pune,Nashik Road,kirana
+OL-263,N Mart,kirana,Pune,Aundh,kirana
+OL-264,K Mart,medical,Nashik,Kothrud,kirana
+OL-265,Z Kirana,supermarket,Pune,Nashik Road,kirana
+OL-266,N Kirana,medical,Pune,Gangapur,supermarket
+OL-267,H Medical & Grocery,kirana,Pune,Hadapsar,kirana
+OL-268,D Medical & Grocery,medical,Nashik,Shivajinagar,supermarket
+OL-269,G Mart,supermarket,Pune,Shivajinagar,kirana
+OL-270,R General Store,kirana,Nashik,Hadapsar,supermarket
+OL-271,W Mart,supermarket,Pune,Kothrud,kirana
+OL-272,Y Kirana,supermarket,Nashik,Wakad,kirana
+OL-273,M Supermarket,kirana,Pune,Kothrud,medical
+OL-274,B Supermarket,supermarket,Pune,Kothrud,medical
+OL-275,J Mart,medical,Pune,Shivajinagar,kirana
+OL-276,P General Store,kirana,Pune,Hadapsar,kirana
+OL-277,D Supermarket,medical,Pune,Aundh,medical
+OL-278,Q Mart,kirana,Nashik,Wakad,kirana
+OL-279,C Supermarket,medical,Pune,Shivajinagar,supermarket
+OL-280,K General Store,kirana,Pune,Gangapur,kirana
+OL-281,P General Store,kirana,Nashik,Wakad,supermarket
+OL-282,L Medical & Grocery,supermarket,Nashik,Hadapsar,kirana
+OL-283,Q Kirana,kirana,Pune,Kothrud,medical
+OL-284,C Kirana,kirana,Nashik,Hadapsar,medical
+OL-285,C Supermarket,kirana,Nashik,Nashik Road,medical
+OL-286,R Mart,medical,Pune,Kothrud,supermarket
+OL-287,R Mart,medical,Pune,Aundh,kirana
+OL-288,A Mart,kirana,Nashik,Aundh,supermarket
+OL-289,U General Store,kirana,Nashik,Kothrud,supermarket
+OL-290,B Mart,medical,Nashik,Aundh,medical
+OL-291,G Kirana,kirana,Nashik,Nashik Road,kirana
+OL-292,N Medical & Grocery,supermarket,Nashik,Hadapsar,kirana
+OL-293,X Medical & Grocery,medical,Pune,Nashik Road,kirana
+OL-294,W Supermarket,kirana,Pune,Aundh,kirana
+OL-295,P Medical & Grocery,kirana,Pune,Hadapsar,kirana
+OL-296,C Supermarket,kirana,Nashik,Wakad,medical
+OL-297,C Medical & Grocery,supermarket,Pune,Shivajinagar,kirana
+OL-298,Z Supermarket,kirana,Pune,Wakad,kirana
+OL-299,H Supermarket,supermarket,Pune,Shivajinagar,medical
+OL-300,B Kirana,kirana,Nashik,Shivajinagar,kirana
+OL-301,U General Store,kirana,Pune,Kothrud,kirana
+OL-302,T Kirana,kirana,Nashik,Aundh,kirana
+OL-303,C Medical & Grocery,kirana,Pune,Shivajinagar,supermarket
+OL-304,W General Store,kirana,Nashik,Wakad,medical
+OL-305,G Medical & Grocery,medical,Nashik,Nashik Road,medical
+OL-306,H General Store,supermarket,Pune,Wakad,kirana
+OL-307,X Mart,kirana,Pune,Kothrud,medical
+OL-308,Q Supermarket,supermarket,Pune,Wakad,kirana
+OL-309,C Mart,medical,Nashik,Nashik Road,kirana
+OL-310,E Mart,kirana,Nashik,Gangapur,kirana
+OL-311,Y Medical & Grocery,medical,Nashik,Aundh,medical
+OL-312,P Mart,medical,Pune,Hadapsar,kirana
+OL-313,K Supermarket,kirana,Nashik,Wakad,kirana
+OL-314,W General Store,medical,Pune,Nashik Road,medical
+OL-315,L Kirana,medical,Pune,Aundh,medical
+OL-316,R Kirana,medical,Pune,Wakad,medical
+OL-317,F Mart,kirana,Pune,Shivajinagar,medical
+OL-318,A Supermarket,kirana,Pune,Kothrud,kirana
+OL-319,F Medical & Grocery,kirana,Pune,Aundh,medical
+OL-320,S Medical & Grocery,medical,Pune,Wakad,medical

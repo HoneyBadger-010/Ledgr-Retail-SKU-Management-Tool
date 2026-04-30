@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Diwali 2023 Retrospective{% endblock %}
+{% block page_title %}Diwali 2023 Retrospective Analysis{% endblock %}
+{% block content %}
+<div class="row mb-3">
+  <div class="col-12"><div class="card hero-card"><div class="card-body text-center py-4"><h1 class="display-6 mb-0" id="hero-metric"><span class="loading-pulse">Analyzing stockout patterns...</span></h1><p class="mt-2 mb-0">Stockout SKUs identified from historical patterns alone -- no manual labeling</p></div></div></div>
+</div>
+<div class="row mb-3">
+  <div class="col-12"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-list-check me-2" style="color:var(--sunrise-primary)"></i>Top 14 Predicted Stockout SKUs</h3></div>
+    <div class="table-responsive"><table class="table table-vcenter card-table table-hover">
+      <thead><tr><th>Rank</th><th>SKU</th><th>Brand</th><th>Category</th><th>Score</th><th>Signals</th><th>Confidence</th></tr></thead>
+      <tbody id="retro-table"></tbody>
+    </table></div>
+  </div></div>
+</div>
+<div class="row mb-3">
+  <div class="col-lg-6"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-chart-area me-2" style="color:var(--sunrise-primary)"></i>SKU Sales Timeline</h3></div>
+    <div class="card-body"><select class="form-select mb-3" id="sku-select" onchange="loadSkuChart()"><option>Loading...</option></select>
+    <div id="chart-sku-sales" style="height:350px"></div></div></div></div>
+  <div class="col-lg-6"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-bulb me-2" style="color:var(--sunrise-accent)"></i>AI Reasoning</h3></div>
+    <div class="card-body"><div id="sku-reasoning" class="reason-text">Select a SKU to see the AI's analysis and reasoning</div></div></div></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+let retroData=[];let skuChart=null;
+function signalTag(sig){
+  const map={sales_dropout:['Sales Dropout','signal-dropout'],demand_surge:['Demand Surge','signal-surge'],
+    diwali_2022_pattern:['Diwali 2022','signal-pattern'],inventory_low:['Inventory Low','signal-inventory'],
+    promo_overlap:['Promo Overlap','signal-promo']};
+  const m=map[sig];return m?`<span class="signal-tag ${m[1]}">${m[0]}</span>`:'';
+}
+async function loadRetro(){
+  const d=await(await fetch('/api/top14')).json();
+  const acc=d.accuracy||{};
+  document.getElementById('hero-metric').innerHTML=`Model identified <strong>${acc.correctly_identified||'?'} / 14</strong> Diwali 2023 stockout SKUs`;
+  retroData=d.predicted_stockout_skus||[];
+  const tb=document.getElementById('retro-table');
+  const sel=document.getElementById('sku-select');
+  tb.innerHTML='';sel.innerHTML='';
+  retroData.forEach(s=>{
+    const sigs=(s.signals_triggered||'').split('|').map(signalTag).join(' ');
+    tb.innerHTML+=`<tr style="animation:fadeUp ${0.3+s.rank*0.05}s ease forwards"><td><strong>#${s.rank}</strong></td><td><strong>${s.product_name}</strong><br><small class="text-secondary">${s.sku_id}</small></td><td>${s.brand}</td><td><span class="badge bg-blue">${s.category}</span></td><td><div style="display:flex;align-items:center;gap:8px"><strong style="font-size:16px">${s.stockout_score}/9</strong><div style="width:60px;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden"><div style="width:${s.stockout_score/9*100}%;height:100%;background:linear-gradient(90deg,#6366f1,#ef4444);border-radius:3px"></div></div></div></td><td>${sigs}</td><td><span class="badge ${s.confidence==='High'?'bg-green':s.confidence==='Medium'?'bg-yellow':'bg-red'}">${s.confidence}</span></td></tr>`;
+    sel.innerHTML+=`<option value="${s.sku_id}">${s.sku_id} -- ${s.product_name}</option>`;
+  });
+  if(retroData.length>0)loadSkuChart();
+}
+async function loadSkuChart(){
+  const sku=document.getElementById('sku-select').value;
+  const info=retroData.find(s=>s.sku_id===sku);
+  if(info)document.getElementById('sku-reasoning').innerHTML=info.reasoning;
+  const sd=await(await fetch(`/api/sku-sales/${sku}`)).json();
+  if(!sd.length)return;
+  if(skuChart)skuChart.destroy();
+  skuChart=new ApexCharts(document.getElementById('chart-sku-sales'),{
+    chart:{type:'area',height:330,toolbar:{show:true}},
+    series:[{name:'Units Sold',data:sd.map(r=>r.units_sold)}],
+    xaxis:{categories:sd.map(r=>r.week_start_date),labels:{rotate:-45,style:{fontSize:'10px'},show:true},tickAmount:20},
+    colors:['#6366f1'],fill:{type:'gradient',gradient:{shadeIntensity:1,opacityFrom:0.5,opacityTo:0.05,stops:[0,90,100]}},
+    annotations:{xaxis:[
+      {x:'2023-10-16',x2:'2023-11-06',fillColor:'#ef444415',borderColor:'#ef4444',label:{text:'Stockout Window',style:{color:'#ef4444',fontWeight:700}}},
+      {x:'2023-10-23',borderColor:'#f97316',strokeDashArray:4,label:{text:'Diwali 2023',style:{color:'#f97316',fontWeight:700}}},
+      {x:'2022-10-24',borderColor:'#10b981',strokeDashArray:4,label:{text:'Diwali 2022',style:{color:'#10b981',fontWeight:700}}}
+    ]},
+    stroke:{width:2,curve:'smooth'},grid:{borderColor:'#f1f5f9'}
+  });skuChart.render();
+}
+loadRetro();
+</script>
+{% endblock %}

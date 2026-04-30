@@ -1,0 +1,41 @@
+sku_id,product_name,category,class,supplier_lead_time_days,moq_from_supplier,warehouse_stock,in_transit_qty,committed_qty,inventory_position_units,six_week_forecast_units,lead_time_demand_units,safety_stock_units,raw_need_units,recommended_order_qty,shelf_life_days,shelf_life_max_order_units,estimated_order_value,risk_flags,recommendation
+SKU-040,Muesli 500g,packaged_food,seasonal,7,12,41,33,65,9,3318,596,313,3622,3624,730,57670,844210.8,stockout_risk,ORDER_NOW
+SKU-028,Coffee 200g,packaged_food,seasonal,6,6,309,40,26,323,3016,523,297,2990,2994,730,52420,827451.78,stockout_risk,ORDER_NOW
+SKU-012,Floor Cleaner 1L,household,stable,11,48,79,69,193,-45,2331,778,147,2119,2160,1095,60772,539892,already_stocked_out,ORDER_NOW
+SKU-018,Dishwasher Tabs 20,household,seasonal,12,6,88,57,25,120,3460,1171,158,3498,3498,1095,90207,524665.02,stockout_risk,ORDER_NOW
+SKU-008,Hair Oil 100ml,personal_care,seasonal,8,24,134,99,116,117,1937,654,148,1968,1968,1095,50500,514454.88,stockout_risk,ORDER_NOW
+SKU-034,Ghee 500g,packaged_food,seasonal,6,24,366,45,185,226,3767,650,303,3844,3864,730,65474,484700.16,stockout_risk,ORDER_NOW
+SKU-017,Mosquito Repellent,household,fast_mover,3,12,325,49,197,177,2983,516,129,2935,2940,1095,77771,457699.2,stockout_risk,ORDER_NOW
+SKU-013,Toilet Cleaner 500ml,household,stable,9,48,136,90,195,31,2395,800,96,2079,2112,1095,62441,410699.52,stockout_risk,ORDER_NOW
+SKU-027,Honey 500g,packaged_food,seasonal,7,48,195,36,84,147,1726,293,88,1667,1680,730,29999,302836.8,stockout_risk,ORDER_NOW
+SKU-016,Air Freshener 300ml,household,seasonal,11,12,37,47,158,-74,2883,982,240,3197,3204,1095,75163,292268.88,already_stocked_out,ORDER_NOW
+SKU-022,Chips 50g,packaged_food,seasonal,3,48,374,20,100,294,1964,351,189,1859,1872,730,34136,283907.52,stockout_risk,ORDER_NOW
+SKU-010,Lip Balm 10g,personal_care,stable,10,6,390,4,152,242,1586,532,106,1185,1188,1095,41349,201247.2,stockout_risk,ORDER_NOW
+SKU-005,Face Wash 100ml,personal_care,fast_mover,6,48,438,1,71,368,3308,581,132,3072,3072,1095,86244,195256.32,stockout_risk,ORDER_NOW
+SKU-002,Shampoo 400ml,personal_care,stable,7,6,228,27,11,244,2313,381,113,1810,1812,1095,60303,186925.92,stockout_risk,ORDER_NOW
+SKU-037,Protein Bar 60g,packaged_food,seasonal,5,12,325,98,1,422,2034,349,181,1793,1800,730,35352,185436,stockout_risk,ORDER_NOW
+SKU-038,Oats 500g,packaged_food,seasonal,8,12,302,90,141,251,2989,1038,343,3081,3084,730,51951,173505.84,stockout_risk,ORDER_NOW
+SKU-019,Laundry Bar 250g,household,stable,8,6,328,68,107,289,1790,585,113,1314,1314,1095,46667,156287.16,stockout_risk,ORDER_NOW
+SKU-011,Dish Wash 500ml,household,seasonal,6,24,355,99,57,397,1852,294,42,1497,1512,1095,48284,145091.52,stockout_risk,ORDER_NOW
+SKU-031,Rice 5kg,packaged_food,seasonal,8,6,286,82,47,321,1203,418,142,1024,1026,730,20909,143557.92,stockout_risk,ORDER_NOW
+SKU-004,Body Wash 250ml,personal_care,stable,10,24,191,39,138,92,1848,629,115,1570,1584,1095,48180,136667.52,stockout_risk,ORDER_NOW
+SKU-036,Soya Sauce 200ml,packaged_food,seasonal,8,12,279,85,184,180,821,277,74,452,456,730,14269,124834.56,stockout_risk,ORDER_NOW
+SKU-001,Shampoo 200ml,personal_care,fast_mover,8,6,23,64,141,-54,3051,1044,187,3292,3294,1095,79543,103662.18,already_stocked_out,ORDER_NOW
+SKU-033,Cooking Oil 1L,packaged_food,seasonal,6,6,6,84,152,-62,254,44,26,260,264,730,4414,75010.32,already_stocked_out,ORDER_NOW
+SKU-032,Dal 1kg,packaged_food,seasonal,6,6,429,24,76,377,3324,580,223,3170,3174,730,57774,72906.78,stockout_risk,ORDER_NOW
+SKU-015,Fabric Softener 1L,household,stable,9,24,327,52,146,233,1447,476,81,1054,1056,1095,37725,68280.96,stockout_risk,ORDER_NOW
+SKU-003,Conditioner 200ml,personal_care,stable,3,24,306,99,195,210,2176,359,98,1697,1704,1095,56731,59299.2,stockout_risk,ORDER_NOW
+SKU-021,Biscuits 200g,packaged_food,seasonal,6,24,248,25,171,102,1052,175,106,1056,1056,730,18284,59294.4,stockout_risk,ORDER_NOW
+SKU-007,Sunscreen 50g,personal_care,seasonal,6,24,127,23,35,115,871,149,49,518,528,1095,22708,57192.96,stockout_risk,ORDER_NOW
+SKU-029,Tea 250g,packaged_food,seasonal,12,6,301,53,100,254,948,331,127,821,822,730,16477,38066.82,stockout_risk,ORDER_NOW
+SKU-025,Ketchup 500g,packaged_food,seasonal,8,6,360,20,183,197,1261,434,157,1221,1224,730,21917,34284.24,stockout_risk,ORDER_NOW
+SKU-014,Glass Cleaner 500ml,household,stable,11,6,118,49,109,58,1406,478,75,1188,1188,1095,36656,27799.2,stockout_risk,ORDER_NOW
+SKU-026,Jam 500g,packaged_food,seasonal,5,12,147,52,91,108,914,158,83,588,588,730,15886,14700,stockout_risk,ORDER_NOW
+SKU-024,Instant Noodles,packaged_food,seasonal,10,12,384,47,55,376,934,325,120,678,684,730,16233,160575.84,none,ORDER_NOW
+SKU-030,Atta 5kg,packaged_food,seasonal,5,24,472,51,170,353,1047,184,101,795,816,730,18197,155097.12,none,ORDER_NOW
+SKU-039,Cornflakes 500g,packaged_food,seasonal,5,24,283,4,2,285,611,101,59,184,192,730,10619,20175.36,none,ORDER_NOW
+SKU-006,Moisturiser 100g,personal_care,seasonal,9,12,232,76,184,124,249,79,15,60,60,1095,6491,16122,none,ORDER_NOW
+SKU-035,Vinegar 500ml,packaged_food,seasonal,9,12,443,98,65,476,678,235,104,87,96,730,11784,15159.36,none,ORDER_NOW
+SKU-009,Talc Powder 100g,personal_care,seasonal,7,6,319,73,176,216,330,59,15,23,24,1095,8603,5331.36,none,ORDER_NOW
+SKU-020,Surface Spray 500ml,household,seasonal,6,12,439,43,72,410,503,85,20,0,0,1095,13113,0,none,NO_ORDER
+SKU-023,Namkeen 150g,packaged_food,seasonal,8,48,373,20,133,260,291,105,52,0,0,730,5057,0,none,NO_ORDER

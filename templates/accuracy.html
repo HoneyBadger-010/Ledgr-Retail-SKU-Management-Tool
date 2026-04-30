@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Forecast Accuracy{% endblock %}
+{% block page_title %}Forecast Accuracy Report{% endblock %}
+{% block content %}
+<div class="row row-deck row-cards mb-3">
+  <div class="col-lg-4"><div class="card hero-card"><div class="card-body text-center py-4"><div class="subheader" style="color:rgba(255,255,255,0.7);font-size:12px">OVERALL MODEL ACCURACY</div><div class="display-4 mt-1 fw-bold" id="acc-overall" style="letter-spacing:-0.03em">--</div><p style="color:rgba(255,255,255,0.6);margin:0;font-size:13px">Mean Absolute Percentage Error</p></div></div></div>
+  <div class="col-lg-4"><div class="card kpi-card kpi-primary"><div class="card-body text-center"><div class="subheader" style="color:var(--sunrise-primary)">LightGBM Models</div><div class="h1 mt-2" id="acc-lgbm">--</div><p style="color:#94a3b8;font-size:12px;margin:0">Primary forecasting engine</p></div></div></div>
+  <div class="col-lg-4"><div class="card kpi-card kpi-warning"><div class="card-body text-center"><div class="subheader text-warning">Rolling Avg Fallback</div><div class="h1 mt-2" id="acc-rolling">--</div><p style="color:#94a3b8;font-size:12px;margin:0">Used when LightGBM data insufficient</p></div></div></div>
+</div>
+<div class="row row-deck row-cards mb-3">
+  <div class="col-lg-6"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-chart-histogram me-2" style="color:var(--sunrise-primary)"></i>MAPE Distribution</h3></div><div class="card-body"><div id="chart-mape-dist" style="height:320px"><div class="loading-pulse text-center pt-5">Loading...</div></div></div></div></div>
+  <div class="col-lg-6"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-list-details me-2" style="color:var(--sunrise-secondary)"></i>Per-SKU Accuracy</h3></div>
+    <div class="card-body" style="max-height:380px;overflow-y:auto">
+      <table class="table table-vcenter table-sm table-hover"><thead><tr><th>SKU</th><th>Model</th><th>MAPE</th><th>Rating</th><th>Accuracy</th></tr></thead>
+      <tbody id="acc-table"></tbody></table>
+    </div></div></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function loadAccuracy(){
+  const d=await(await fetch('/api/forecast-accuracy')).json();
+  const mape=d.overall_mape||0;
+  const el=document.getElementById('acc-overall');
+  el.textContent=mape.toFixed(1)+'%';
+  document.getElementById('acc-lgbm').textContent=d.lgbm_count||0;
+  document.getElementById('acc-rolling').textContent=d.rolling_avg_count||0;
+  const perSku=d.per_sku_mape||{};
+  const entries=Object.entries(perSku).sort((a,b)=>a[1].mape-b[1].mape);
+  const tb=document.getElementById('acc-table');tb.innerHTML='';
+  entries.forEach(([sku,info],i)=>{
+    const m=info.mape;
+    const barColor=m<15?'#10b981':m<30?'#f59e0b':'#ef4444';
+    const rating=m<10?'Excellent':m<15?'Good':m<25?'Fair':'Poor';
+    const ratingBadge=m<10?'bg-green':m<15?'bg-blue':m<25?'bg-yellow':'bg-red';
+    tb.innerHTML+=`<tr style="animation:fadeUp ${0.2+i*0.04}s ease forwards"><td style="font-weight:600">${sku}</td><td><span class="badge ${info.model_used==='LightGBM'?'bg-blue':'bg-orange'}">${info.model_used}</span></td><td style="font-weight:700;color:${barColor}">${m.toFixed(1)}%</td><td><span class="badge ${ratingBadge}">${rating}</span></td><td style="width:120px"><div style="background:#e2e8f0;border-radius:4px;height:6px;overflow:hidden"><div style="width:${Math.min(100,100-m)}%;height:100%;background:${barColor};border-radius:4px;transition:width 0.8s ease"></div></div></td></tr>`;
+  });
+  const mapes=entries.map(e=>e[1].mape).filter(m=>m<200);
+  const bins=[0,5,10,15,20,25,30,40,50,100];
+  const counts=bins.slice(0,-1).map((_,i)=>mapes.filter(m=>m>=bins[i]&&m<bins[i+1]).length);
+  const barColors=bins.slice(0,-1).map((b)=>b<15?'#10b981':b<30?'#f59e0b':'#ef4444');
+  document.getElementById('chart-mape-dist').innerHTML='';
+  new ApexCharts(document.getElementById('chart-mape-dist'),{chart:{type:'bar',height:300,toolbar:{show:false},animations:{enabled:true,speed:600}},
+    series:[{name:'SKU Count',data:counts}],
+    xaxis:{categories:bins.slice(0,-1).map((b,i)=>`${b}-${bins[i+1]}%`),labels:{style:{fontSize:'11px',fontWeight:600}}},
+    colors:barColors,
+    plotOptions:{bar:{borderRadius:6,columnWidth:'60%',distributed:true}},
+    grid:{borderColor:'#f1f5f9'},
+    dataLabels:{enabled:true,style:{fontSize:'13px',fontWeight:700}},
+    legend:{show:false}}).render();
+}
+loadAccuracy();
+</script>
+{% endblock %}

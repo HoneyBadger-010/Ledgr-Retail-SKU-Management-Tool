@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}6-Week Forecast{% endblock %}
+{% block page_title %}6-Week Demand Forecast{% endblock %}
+{% block content %}
+<div class="row mb-3">
+  <div class="col-lg-4"><div class="card"><div class="card-body">
+    <label class="form-label fw-bold" style="color:var(--sunrise-primary)"><i class="ti ti-package me-1"></i>Select SKU</label>
+    <select class="form-select" id="fc-sku" onchange="loadForecast()"><option>Loading...</option></select>
+  </div></div></div>
+  <div class="col-lg-8">
+    <div class="row row-deck row-cards">
+      <div class="col-4"><div class="card kpi-card kpi-primary"><div class="card-body text-center"><div class="subheader">6-Week Forecast</div><div class="h2 mt-1" id="fc-total">--</div></div></div></div>
+      <div class="col-4"><div class="card kpi-card kpi-success"><div class="card-body text-center"><div class="subheader">MAPE Score</div><div class="h2 mt-1" id="fc-mape">--</div></div></div></div>
+      <div class="col-4"><div class="card kpi-card kpi-warning"><div class="card-body text-center"><div class="subheader">Model Used</div><div class="h2 mt-1" id="fc-model">--</div></div></div></div>
+    </div>
+  </div>
+</div>
+<div class="row mb-3">
+  <div class="col-12"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-chart-line me-2" style="color:var(--sunrise-primary)"></i>Historical + 6-Week Forecast</h3></div>
+    <div class="card-body"><div id="chart-forecast" style="height:420px"><div class="loading-pulse text-center pt-5">Loading forecast data...</div></div></div></div></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+let fcChart=null;
+async function initForecast(){
+  const skus=await(await fetch('/api/sku-list')).json();
+  const sel=document.getElementById('fc-sku');sel.innerHTML='';
+  skus.forEach(s=>{sel.innerHTML+=`<option value="${s.sku_id}">${s.sku_id} -- ${s.product_name} (${s.category})</option>`;});
+  loadForecast();
+}
+async function loadForecast(){
+  const sku=document.getElementById('fc-sku').value;
+  const [hist,fc]=await Promise.all([fetch(`/api/sku-sales/${sku}`).then(r=>r.json()),fetch(`/api/forecasts?sku=${sku}`).then(r=>r.json())]);
+  const total=fc.reduce((a,r)=>a+r.forecasted_units,0);
+  const mape=fc.length?fc[0].mape_score:0;
+  const model=fc.length?fc[0].model_used:'--';
+  document.getElementById('fc-total').textContent=total.toLocaleString()+' units';
+  const mapeEl=document.getElementById('fc-mape');
+  mapeEl.textContent=mape.toFixed(1)+'%';
+  mapeEl.style.cssText='-webkit-text-fill-color:'+(mape<15?'#10b981':mape<30?'#f59e0b':'#ef4444')+';background:none';
+  document.getElementById('fc-model').innerHTML=`<span class="badge ${model==='LightGBM'?'bg-blue':'bg-orange'}" style="font-size:14px">${model}</span>`;
+  const lastHist=hist.slice(-20);
+  const dates=[...lastHist.map(r=>r.week_start_date),...fc.map(r=>r.week_start_date)];
+  const histVals=[...lastHist.map(r=>r.units_sold),...fc.map(()=>null)];
+  const fcVals=[...lastHist.map(()=>null),...fc.map(r=>r.forecasted_units)];
+  if(lastHist.length>0&&fc.length>0){fcVals[lastHist.length-1]=lastHist[lastHist.length-1].units_sold;}
+  const upper=[...lastHist.map(()=>null),...fc.map(r=>r.upper_bound||r.forecasted_units*1.2)];
+  const lower=[...lastHist.map(()=>null),...fc.map(r=>r.lower_bound||r.forecasted_units*0.8)];
+  if(fcChart)fcChart.destroy();
+  document.getElementById('chart-forecast').innerHTML='';
+  fcChart=new ApexCharts(document.getElementById('chart-forecast'),{
+    chart:{type:'line',height:400,toolbar:{show:true},animations:{enabled:true,easing:'easeinout',speed:800}},
+    series:[{name:'Historical',data:histVals,type:'line'},{name:'Forecast',data:fcVals,type:'line'},{name:'Upper Bound',data:upper,type:'line'},{name:'Lower Bound',data:lower,type:'line'}],
+    xaxis:{categories:dates,labels:{rotate:-45,style:{fontSize:'10px'}},tickAmount:15},
+    colors:['#64748b','#6366f1','#a5b4fc','#a5b4fc'],
+    stroke:{width:[3,3,1,1],dashArray:[0,0,5,5],curve:'smooth'},
+    fill:{type:['solid','solid','none','none']},
+    legend:{position:'top',fontSize:'12px',fontWeight:600},
+    grid:{borderColor:'#f1f5f9'},
+    tooltip:{theme:'light'}
+  });fcChart.render();
+}
+initForecast();
+</script>
+{% endblock %}

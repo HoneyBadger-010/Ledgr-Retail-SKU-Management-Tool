@@ -1,0 +1,10 @@
+pandas
+numpy
+scikit-learn
+lightgbm
+flask
+plotly
+apscheduler
+matplotlib
+scipy
+openpyxl

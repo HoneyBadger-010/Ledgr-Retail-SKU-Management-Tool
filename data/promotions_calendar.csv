@@ -1,0 +1,6 @@
+promo_id,promo_name,start_date,end_date,sku_ids,uplift_pct,promo_type
+PR001,Diwali Mega Sale,2023-10-15,2023-11-05,"SKU-001,SKU-002,SKU-021,SKU-031",85,Price discount
+PR002,Summer Skincare,2023-04-01,2023-06-15,"SKU-001,SKU-006,SKU-007",35,Bundle offer
+PR003,Monsoon Snacks,2023-07-01,2023-08-31,"SKU-021,SKU-022,SKU-031",45,Buy 2 get 1
+PR004,New Year Sale,2022-12-26,2023-01-08,"SKU-011,SKU-021,SKU-041",30,Price discount
+PR005,Diwali 2022,2022-10-18,2022-11-06,"SKU-001,SKU-002,SKU-021,SKU-031",90,Price discount

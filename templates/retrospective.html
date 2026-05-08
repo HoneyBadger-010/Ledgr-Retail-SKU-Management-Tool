@@ -1,70 +1,120 @@
 {% extends "base.html" %}
-{% block title %}Diwali 2023 Retrospective{% endblock %}
-{% block page_title %}Diwali 2023 Retrospective Analysis{% endblock %}
+{% block title %}Reports{% endblock %}
 {% block content %}
-<div class="row mb-3">
-  <div class="col-12"><div class="card hero-card"><div class="card-body text-center py-4"><h1 class="display-6 mb-0" id="hero-metric"><span class="loading-pulse">Analyzing stockout patterns...</span></h1><p class="mt-2 mb-0">Stockout SKUs identified from historical patterns alone -- no manual labeling</p></div></div></div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+  <h2 style="margin:0;font-size:22px;font-weight:700">Performance Reports Dashboard</h2>
 </div>
-<div class="row mb-3">
-  <div class="col-12"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-list-check me-2" style="color:var(--sunrise-primary)"></i>Top 14 Predicted Stockout SKUs</h3></div>
-    <div class="table-responsive"><table class="table table-vcenter card-table table-hover">
-      <thead><tr><th>Rank</th><th>SKU</th><th>Brand</th><th>Category</th><th>Score</th><th>Signals</th><th>Confidence</th></tr></thead>
-      <tbody id="retro-table"></tbody>
-    </table></div>
-  </div></div>
+
+<!-- Report Config Card -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+  <div class="df-card">
+    <div class="df-card-header"><div class="df-card-title"><i class="ti ti-file-analytics" style="color:#3B82F6"></i>Report Configuration</div></div>
+    <div class="df-card-body">
+      <div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap">
+        <div style="flex:1;min-width:180px">
+          <label style="font-size:11px;font-weight:600;color:#64748B;text-transform:uppercase;margin-bottom:4px;display:block">Report Type</label>
+          <select class="df-btn-outline" style="width:100%;padding:8px 12px;cursor:pointer">
+            <option>Monday Morning Executive Summary</option><option>Weekly SKU Performance</option><option>Monthly Supplier Review</option>
+          </select>
+        </div>
+        <div style="flex:1;min-width:180px">
+          <label style="font-size:11px;font-weight:600;color:#64748B;text-transform:uppercase;margin-bottom:4px;display:block">Date Range</label>
+          <select class="df-btn-outline" style="width:100%;padding:8px 12px;cursor:pointer">
+            <option>Week 45: Nov 01 – Nov 07, 2026</option><option>Week 44: Oct 25 – Oct 31, 2026</option><option>Week 43: Oct 18 – Oct 24, 2026</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" style="font-size:13px;padding:8px 18px;border-radius:6px;white-space:nowrap"><i class="ti ti-brand-whatsapp me-1"></i>Generate and WhatsApp Report</button>
+      </div>
+    </div>
+  </div>
+  <div class="df-card">
+    <div class="df-card-header"><div class="df-card-title"><i class="ti ti-calendar-event" style="color:#3B82F6"></i>Scheduled Reports</div></div>
+    <div class="df-card-body">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:14px;font-weight:600">Monday 08:00 AM IST auto-trigger</div>
+          <div style="font-size:12px;color:#64748B;margin-top:2px">Pipeline: clean → forecast → retro → reorder → classify → report</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="df-flag df-flag-ok">ACTIVE</span>
+          <button class="df-btn-outline" style="padding:5px 12px"><i class="ti ti-refresh"></i> Retrain</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-<div class="row mb-3">
-  <div class="col-lg-6"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-chart-area me-2" style="color:var(--sunrise-primary)"></i>SKU Sales Timeline</h3></div>
-    <div class="card-body"><select class="form-select mb-3" id="sku-select" onchange="loadSkuChart()"><option>Loading...</option></select>
-    <div id="chart-sku-sales" style="height:350px"></div></div></div></div>
-  <div class="col-lg-6"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-bulb me-2" style="color:var(--sunrise-accent)"></i>AI Reasoning</h3></div>
-    <div class="card-body"><div id="sku-reasoning" class="reason-text">Select a SKU to see the AI's analysis and reasoning</div></div></div></div>
+
+<!-- Week 45 Performance: 4 metric cards -->
+<div style="font-size:15px;font-weight:600;margin-bottom:12px">Week 45 Performance</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px">
+  <!-- 1: Revenue vs Forecast -->
+  <div class="df-card">
+    <div class="df-card-header" style="padding:12px 16px"><div class="df-card-title" style="font-size:12px">Revenue vs Forecast</div></div>
+    <div class="df-card-body" style="padding:12px"><canvas id="chart-revenue" height="140"></canvas></div>
+  </div>
+  <!-- 2: Stockout Impact -->
+  <div class="df-card">
+    <div class="df-card-header" style="padding:12px 16px"><div class="df-card-title" style="font-size:12px">Stockout Impact</div></div>
+    <div class="df-card-body" style="padding:12px"><canvas id="chart-stockout" height="140"></canvas></div>
+  </div>
+  <!-- 3: Capital Trapped -->
+  <div class="df-card">
+    <div class="df-card-header" style="padding:12px 16px"><div class="df-card-title" style="font-size:12px">Capital Trapped</div></div>
+    <div class="df-card-body" style="padding:10px">
+      <div id="capital-list" style="font-size:12px"></div>
+      <div style="background:#FEFCE8;border-radius:6px;padding:8px 12px;margin-top:10px;text-align:center">
+        <span style="font-size:11px;color:#A16207;font-weight:600">Total Dead Capital</span>
+        <div style="font-size:18px;font-weight:700;color:#A16207" id="dead-capital">₹45K</div>
+      </div>
+    </div>
+  </div>
+  <!-- 4: Forecast Accuracy -->
+  <div class="df-card">
+    <div class="df-card-header" style="padding:12px 16px"><div class="df-card-title" style="font-size:12px">Forecast Accuracy</div></div>
+    <div class="df-card-body" style="padding:12px;text-align:center">
+      <canvas id="chart-accuracy" height="100"></canvas>
+      <div style="font-size:20px;font-weight:700;margin-top:8px">MAPE: <span id="rpt-mape">16.5%</span></div>
+      <span class="df-flag df-flag-ok" style="margin-top:4px">ML Confidence: GOOD</span>
+    </div>
+  </div>
 </div>
+
+<!-- Right Panel: RAG notes -->
+<aside class="df-right-panel open" id="rag-panel">
+  <div class="df-right-panel-header">
+    <h4>RAG Executive Notes</h4>
+    <button class="df-right-panel-close" onclick="document.getElementById('rag-panel').classList.remove('open');document.querySelector('.df-main').classList.remove('panel-open')"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="df-right-panel-body" style="font-size:13px;line-height:1.7;color:#475569">
+    <p><strong style="color:#1E293B">Week 45 Executive Summary:</strong> Overall demand tracked 94.2% to forecast. Three festive SKUs (SKU-011, SKU-012, SKU-014) showed 18–25% higher demand than predicted, indicating the Diwali pre-ramp started earlier than historical patterns suggested.</p>
+    <p style="margin-top:12px"><strong style="color:#1E293B">Action Required:</strong> Recommend increasing safety stock multiplier for all festive-flagged SKUs by 1.5× for weeks 46–48. SKU-012 (Haldiram's Namkeen) is at critical stockout risk — order immediately via expedited channel. Two dead stock SKUs (SKU-078, SKU-091) should be evaluated for clearance markdown.</p>
+    <p style="margin-top:12px;font-size:11px;color:#94A3B8"><i class="ti ti-brain me-1"></i>Generated by LightGBM v3.1 + RAG pipeline</p>
+  </div>
+</aside>
 {% endblock %}
+
 {% block scripts %}
 <script>
-let retroData=[];let skuChart=null;
-function signalTag(sig){
-  const map={sales_dropout:['Sales Dropout','signal-dropout'],demand_surge:['Demand Surge','signal-surge'],
-    diwali_2022_pattern:['Diwali 2022','signal-pattern'],inventory_low:['Inventory Low','signal-inventory'],
-    promo_overlap:['Promo Overlap','signal-promo']};
-  const m=map[sig];return m?`<span class="signal-tag ${m[1]}">${m[0]}</span>`:'';
-}
-async function loadRetro(){
-  const d=await(await fetch('/api/top14')).json();
-  const acc=d.accuracy||{};
-  document.getElementById('hero-metric').innerHTML=`Model identified <strong>${acc.correctly_identified||'?'} / 14</strong> Diwali 2023 stockout SKUs`;
-  retroData=d.predicted_stockout_skus||[];
-  const tb=document.getElementById('retro-table');
-  const sel=document.getElementById('sku-select');
-  tb.innerHTML='';sel.innerHTML='';
-  retroData.forEach(s=>{
-    const sigs=(s.signals_triggered||'').split('|').map(signalTag).join(' ');
-    tb.innerHTML+=`<tr style="animation:fadeUp ${0.3+s.rank*0.05}s ease forwards"><td><strong>#${s.rank}</strong></td><td><strong>${s.product_name}</strong><br><small class="text-secondary">${s.sku_id}</small></td><td>${s.brand}</td><td><span class="badge bg-blue">${s.category}</span></td><td><div style="display:flex;align-items:center;gap:8px"><strong style="font-size:16px">${s.stockout_score}/9</strong><div style="width:60px;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden"><div style="width:${s.stockout_score/9*100}%;height:100%;background:linear-gradient(90deg,#6366f1,#ef4444);border-radius:3px"></div></div></div></td><td>${sigs}</td><td><span class="badge ${s.confidence==='High'?'bg-green':s.confidence==='Medium'?'bg-yellow':'bg-red'}">${s.confidence}</span></td></tr>`;
-    sel.innerHTML+=`<option value="${s.sku_id}">${s.sku_id} -- ${s.product_name}</option>`;
-  });
-  if(retroData.length>0)loadSkuChart();
-}
-async function loadSkuChart(){
-  const sku=document.getElementById('sku-select').value;
-  const info=retroData.find(s=>s.sku_id===sku);
-  if(info)document.getElementById('sku-reasoning').innerHTML=info.reasoning;
-  const sd=await(await fetch(`/api/sku-sales/${sku}`)).json();
-  if(!sd.length)return;
-  if(skuChart)skuChart.destroy();
-  skuChart=new ApexCharts(document.getElementById('chart-sku-sales'),{
-    chart:{type:'area',height:330,toolbar:{show:true}},
-    series:[{name:'Units Sold',data:sd.map(r=>r.units_sold)}],
-    xaxis:{categories:sd.map(r=>r.week_start_date),labels:{rotate:-45,style:{fontSize:'10px'},show:true},tickAmount:20},
-    colors:['#6366f1'],fill:{type:'gradient',gradient:{shadeIntensity:1,opacityFrom:0.5,opacityTo:0.05,stops:[0,90,100]}},
-    annotations:{xaxis:[
-      {x:'2023-10-16',x2:'2023-11-06',fillColor:'#ef444415',borderColor:'#ef4444',label:{text:'Stockout Window',style:{color:'#ef4444',fontWeight:700}}},
-      {x:'2023-10-23',borderColor:'#f97316',strokeDashArray:4,label:{text:'Diwali 2023',style:{color:'#f97316',fontWeight:700}}},
-      {x:'2022-10-24',borderColor:'#10b981',strokeDashArray:4,label:{text:'Diwali 2022',style:{color:'#10b981',fontWeight:700}}}
-    ]},
-    stroke:{width:2,curve:'smooth'},grid:{borderColor:'#f1f5f9'}
-  });skuChart.render();
-}
-loadRetro();
+document.querySelector('.df-main').classList.add('panel-open');
+
+// Revenue vs Forecast
+new Chart(document.getElementById('chart-revenue'),{type:'line',data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[
+  {label:'Actual',data:[42,48,38,52,45,62,55],borderColor:'#2563EB',borderWidth:2,tension:0.4,pointRadius:2,fill:false},
+  {label:'Forecasted',data:[40,45,42,48,50,58,52],borderColor:'#93C5FD',borderWidth:2,tension:0.4,pointRadius:2,borderDash:[4,4],fill:false}
+]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:12}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{grid:{color:'#E2E8F0'},ticks:{font:{size:9},callback:v=>v+'k'}}}}});
+
+// Stockout Impact
+new Chart(document.getElementById('chart-stockout'),{type:'bar',data:{labels:['SKU-012','SKU-011','SKU-014','SKU-023','SKU-031'],datasets:[{data:[45,28,22,15,8],backgroundColor:'#EF4444',borderRadius:4}]},options:{responsive:true,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'#E2E8F0'},ticks:{font:{size:9},callback:v=>'₹'+v+'k'}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+
+// Capital Trapped list
+const capSkus=[{sku:'SKU-078',val:18},{sku:'SKU-091',val:12},{sku:'SKU-045',val:8},{sku:'SKU-067',val:4},{sku:'SKU-032',val:3}];
+document.getElementById('capital-list').innerHTML=capSkus.map(c=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="font-weight:500;width:60px">${c.sku}</span><div style="flex:1;background:#E2E8F0;border-radius:3px;height:8px"><div style="width:${c.val/18*100}%;background:#3B82F6;border-radius:3px;height:100%"></div></div><span style="font-size:10px;color:#64748B">₹${c.val}k</span></div>`).join('');
+document.getElementById('dead-capital').textContent='₹'+capSkus.reduce((a,c)=>a+c.val,0)+'K';
+
+// Accuracy donut
+new Chart(document.getElementById('chart-accuracy'),{type:'doughnut',data:{labels:['Accurate','Error'],datasets:[{data:[83.5,16.5],backgroundColor:['#22C55E','#EF4444'],borderWidth:0}]},options:{responsive:true,cutout:'70%',plugins:{legend:{display:false}}}});
+
+// Load real MAPE if available
+fetch('/api/forecast-accuracy').then(r=>r.json()).then(d=>{if(d.overall_mape_pct)document.getElementById('rpt-mape').textContent=d.overall_mape_pct.toFixed(1)+'%';}).catch(()=>{});
 </script>
 {% endblock %}

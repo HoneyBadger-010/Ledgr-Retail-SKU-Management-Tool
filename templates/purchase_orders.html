@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Purchase Orders{% endblock %}
+{% block page_title %}Purchase Orders (GST Compliant){% endblock %}
+{% block content %}
+<div class="row row-cards mb-3">
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="kpi-label">PO Generated</div><div class="kpi-value" id="kpi-po-count">--</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="kpi-label">Subtotal (Pre-Tax)</div><div class="kpi-value" id="kpi-subtotal">--</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="kpi-label">Total GST</div><div class="kpi-value text-warning" id="kpi-tax">--</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="kpi-label">Grand Total</div><div class="kpi-value text-success" id="kpi-grand">--</div></div></div></div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header">
+    <h3 class="card-title"><i class="ti ti-file-invoice me-2"></i>Generate Purchase Order</h3>
+    <div class="card-actions">
+      <button class="btn btn-primary" id="btn-generate" onclick="generatePO()"><i class="ti ti-plus me-1"></i>Generate from Reorder Recommendations</button>
+    </div>
+  </div>
+  <div class="card-body" id="po-status">
+    <div class="text-muted text-center py-4"><i class="ti ti-file-invoice" style="font-size:48px;color:#dadfe5"></i><p class="mt-2">Click "Generate" to create a GST-compliant purchase order from AI reorder recommendations.</p></div>
+  </div>
+</div>
+
+<div class="card mb-3" id="po-card" style="display:none">
+  <div class="card-header" style="background:#1a1c2e;color:#fff">
+    <h3 class="card-title" style="color:#fff"><i class="ti ti-file-invoice me-2"></i>Purchase Order: <span id="po-number">--</span></h3>
+    <div class="card-actions"><button class="btn btn-sm btn-light" onclick="window.print()"><i class="ti ti-printer me-1"></i>Print</button></div>
+  </div>
+  <div class="card-body">
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <strong>From:</strong> Sunrise Consumer Goods Pvt. Ltd.<br>
+        <span class="text-muted">Plot 42, Hadapsar Industrial Estate, Pune 411028<br>GSTIN: 27AABCS1234A1Z5</span>
+      </div>
+      <div class="col-md-6 text-end">
+        <strong>Date:</strong> <span id="po-date">--</span><br>
+        <strong>PO #:</strong> <span id="po-number-2">--</span>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-vcenter card-table">
+        <thead><tr>
+          <th>#</th><th>SKU ID</th><th>Product</th><th>Qty</th><th>Unit Price</th>
+          <th>Base Amount</th><th>CGST (9%)</th><th>SGST (9%)</th><th>Total</th>
+        </tr></thead>
+        <tbody id="po-tbody"></tbody>
+        <tfoot>
+          <tr class="fw-bold"><td colspan="5" class="text-end">Subtotal</td><td id="po-subtotal">--</td><td colspan="2"></td><td></td></tr>
+          <tr><td colspan="5" class="text-end">Total GST</td><td colspan="2"></td><td></td><td id="po-tax" class="fw-bold">--</td></tr>
+          <tr class="fw-bold" style="font-size:15px"><td colspan="5" class="text-end">Grand Total (₹)</td><td colspan="3"></td><td id="po-grand" class="text-success">--</td></tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function generatePO(){
+  document.getElementById('btn-generate').disabled=true;
+  document.getElementById('po-status').innerHTML='<div class="text-center py-4"><div class="spinner-border text-primary"></div><p class="mt-2">Generating GST-compliant PO...</p></div>';
+  try{
+    const r=await fetch('/api/generate-po',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})});
+    const d=await r.json();
+    if(d.status!=='success'){document.getElementById('po-status').innerHTML='<div class="alert alert-danger">'+d.message+'</div>';return;}
+
+    document.getElementById('kpi-po-count').textContent=d.item_count;
+    document.getElementById('kpi-subtotal').textContent='₹'+d.subtotal.toLocaleString('en-IN');
+    document.getElementById('kpi-tax').textContent='₹'+d.total_tax.toLocaleString('en-IN');
+    document.getElementById('kpi-grand').textContent='₹'+d.grand_total.toLocaleString('en-IN');
+    document.getElementById('po-number').textContent=d.po_number;
+    document.getElementById('po-number-2').textContent=d.po_number;
+    document.getElementById('po-date').textContent=d.date;
+    document.getElementById('po-subtotal').textContent='₹'+d.subtotal.toLocaleString('en-IN');
+    document.getElementById('po-tax').textContent='₹'+d.total_tax.toLocaleString('en-IN');
+    document.getElementById('po-grand').textContent='₹'+d.grand_total.toLocaleString('en-IN');
+
+    document.getElementById('po-tbody').innerHTML=d.items.map((item,i)=>`<tr>
+      <td>${i+1}</td><td><strong>${item.sku_id}</strong></td><td>${item.product_name||''}</td>
+      <td>${item.qty}</td><td>₹${item.unit_price.toFixed(2)}</td>
+      <td>₹${item.base_amount.toLocaleString('en-IN')}</td>
+      <td>₹${item.cgst_amount.toFixed(2)}</td><td>₹${item.sgst_amount.toFixed(2)}</td>
+      <td class="fw-bold">₹${item.total.toLocaleString('en-IN')}</td>
+    </tr>`).join('');
+
+    document.getElementById('po-card').style.display='block';
+    document.getElementById('po-status').innerHTML='<div class="alert alert-success"><i class="ti ti-check me-2"></i>PO generated successfully with '+d.item_count+' line items.</div>';
+  }catch(e){
+    document.getElementById('po-status').innerHTML='<div class="alert alert-danger">Error: '+e.message+'</div>';
+  }
+  document.getElementById('btn-generate').disabled=false;
+}
+</script>
+{% endblock %}

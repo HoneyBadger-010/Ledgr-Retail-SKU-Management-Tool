@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Login — Sunrise Demand AI</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.2.0/dist/css/tabler.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f1f5f9; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    .login-wrapper { width: 100%; max-width: 420px; padding: 0 16px; }
+    .login-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden; border: 1px solid #e6e7e9; }
+    .login-header { background: #1a1c2e; color: #fff; padding: 32px 32px 28px; text-align: center; }
+    .login-header .brand { font-size: 28px; font-weight: 700; color: #4ade80; margin-bottom: 4px; }
+    .login-header .subtitle { font-size: 13px; color: rgba(255,255,255,0.5); }
+    .login-body { padding: 32px; }
+    .login-footer { text-align: center; padding: 16px 32px 24px; }
+    .login-footer .text-muted { font-size: 12px; }
+    .form-label { font-weight: 500; font-size: 13px; color: #626976; }
+    .btn-login { background: #206bc4; border: none; font-weight: 600; padding: 10px; font-size: 15px; border-radius: 8px; width: 100%; }
+    .btn-login:hover { background: #1a5dab; }
+    .demo-accounts { background: #f8f9fa; border-radius: 8px; padding: 14px; margin-top: 16px; border: 1px solid #e6e7e9; }
+    .demo-accounts h6 { font-size: 11px; font-weight: 600; text-transform: uppercase; color: #626976; letter-spacing: 0.05em; margin-bottom: 8px; }
+    .demo-account { cursor: pointer; padding: 6px 10px; border-radius: 6px; margin-bottom: 4px; font-size: 12px; transition: background 0.15s; }
+    .demo-account:hover { background: #e6e7e9; }
+    .demo-account .role { font-weight: 600; color: #206bc4; }
+    .demo-account .email { color: #626976; }
+    .alert { border-radius: 8px; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="login-wrapper">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="brand">☀ Sunrise AI</div>
+        <div class="subtitle">Demand Forecasting & SKU Management</div>
+      </div>
+      <div class="login-body">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for cat, msg in messages %}
+        <div class="alert alert-{{ cat }} mb-3"><i class="ti ti-alert-circle me-1"></i>{{ msg }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="/login">
+          <div class="mb-3">
+            <label class="form-label">Email Address</label>
+            <div class="input-icon">
+              <span class="input-icon-addon"><i class="ti ti-mail"></i></span>
+              <input type="email" name="email" class="form-control" placeholder="Enter your email" required autocomplete="email" autofocus id="login-email">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label d-flex justify-content-between">
+              <span>Password</span>
+            </label>
+            <div class="input-icon">
+              <span class="input-icon-addon"><i class="ti ti-lock"></i></span>
+              <input type="password" name="password" class="form-control" placeholder="Enter your password" required autocomplete="current-password" id="login-password">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-login"><i class="ti ti-login me-2"></i>Sign In</button>
+        </form>
+
+        <div class="demo-accounts">
+          <h6>Demo Accounts</h6>
+          <div class="demo-account" onclick="fillLogin('owner@sunrise.com','sunrise2024')">
+            <span class="role">Owner</span> — <span class="email">owner@sunrise.com</span>
+          </div>
+          <div class="demo-account" onclick="fillLogin('manager@sunrise.com','manager2024')">
+            <span class="role">Manager</span> — <span class="email">manager@sunrise.com</span>
+          </div>
+          <div class="demo-account" onclick="fillLogin('salesman@sunrise.com','sales2024')">
+            <span class="role">Salesman</span> — <span class="email">salesman@sunrise.com</span>
+          </div>
+        </div>
+      </div>
+      <div class="login-footer">
+        <p class="text-muted">Sunrise Consumer Goods — Pune & Nashik • v2.0</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function fillLogin(email, password) {
+      document.getElementById('login-email').value = email;
+      document.getElementById('login-password').value = password;
+    }
+  </script>
+</body>
+</html>

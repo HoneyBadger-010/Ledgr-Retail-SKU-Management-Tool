@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Data Quality{% endblock %}
+{% block page_title %}Data Quality Monitor{% endblock %}
+{% block content %}
+<!-- KPI Row -->
+<div class="row row-cards mb-3">
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="kpi-label">Rows Accepted (This Week)</div><div class="kpi-value text-success" id="kpi-accepted">--</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="kpi-label">Rows Rejected</div><div class="kpi-value text-danger" id="kpi-rejected">--</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="kpi-label">Acceptance Rate</div><div class="kpi-value" id="kpi-rate">--</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="kpi-label">Outlets Not Reporting</div><div class="kpi-value text-warning" id="kpi-outlets">--</div></div></div></div>
+</div>
+
+<div id="alert-area" class="mb-3"></div>
+
+<!-- Charts Row -->
+<div class="row row-cards mb-3">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title"><i class="ti ti-chart-bar me-2"></i>Upload Quality — Last 8 Weeks</h3></div>
+      <div class="card-body"><div id="chart-quality" style="height:320px"><div class="loading-pulse text-center pt-5">Loading chart...</div></div></div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title"><i class="ti ti-chart-donut me-2"></i>Data Classification Breakdown</h3></div>
+      <div class="card-body"><div id="chart-classification-breakdown" style="height:320px"><div class="loading-pulse text-center pt-5">Loading chart...</div></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="row row-cards mb-3">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title"><i class="ti ti-alert-triangle text-danger me-2"></i>Top Rejection Reasons</h3></div>
+      <div class="table-responsive">
+        <table class="table table-vcenter card-table">
+          <thead><tr><th>#</th><th>Reason</th><th>Description</th><th>Count</th><th>% of Rejected</th></tr></thead>
+          <tbody id="rejection-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title"><i class="ti ti-building-store me-2"></i>Outlet Reporting Status</h3></div>
+      <div class="card-body">
+        <div class="mb-3"><strong>Coverage:</strong> <span id="outlet-coverage" class="text-success fw-bold">--</span></div>
+        <div id="chart-outlet-status" style="height:240px"><div class="loading-pulse text-center pt-5">Loading chart...</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header"><h3 class="card-title"><i class="ti ti-trending-up me-2"></i>Row Count Drift Detector</h3></div>
+  <div class="card-body"><div id="chart-drift" style="height:240px"><div class="loading-pulse text-center pt-5">Loading chart...</div></div></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function loadDataQuality(){
+  const r=await fetch('/api/data-quality');const d=await r.json();
+  document.getElementById('kpi-accepted').textContent=(d.accepted_rows||0).toLocaleString('en-IN');
+  document.getElementById('kpi-rejected').textContent=(d.rejected_rows||0).toLocaleString('en-IN');
+  const rate=d.acceptance_rate||0;
+  document.getElementById('kpi-rate').textContent=rate.toFixed(1)+'%';
+  document.getElementById('kpi-rate').style.color=rate>90?'#2fb344':rate>70?'#f59f00':'#d63939';
+  document.getElementById('kpi-outlets').textContent=d.outlets_not_reporting||0;
+
+  let alerts='';
+  if(d.outlets_not_reporting>0)alerts+=`<div class="alert alert-danger"><i class="ti ti-alert-triangle me-2"></i><strong>${d.outlets_not_reporting} outlets</strong> have not reported for 2+ consecutive weeks.</div>`;
+  if(d.row_count_drift)alerts+=`<div class="alert alert-danger"><i class="ti ti-trending-down me-2"></i><strong>Row count drift:</strong> This week ${d.drift_pct||0}% below 4-week average.</div>`;
+  if(rate>=95)alerts+=`<div class="alert alert-success"><i class="ti ti-circle-check me-2"></i>Data quality is excellent — ${rate.toFixed(1)}% acceptance rate.</div>`;
+  document.getElementById('alert-area').innerHTML=alerts;
+
+  document.getElementById('chart-quality').innerHTML='';
+  new ApexCharts(document.getElementById('chart-quality'),{chart:{type:'bar',height:300,stacked:true,toolbar:{show:false}},series:[{name:'Accepted',data:d.weekly_accepted||[]},{name:'Rejected',data:d.weekly_rejected||[]}],xaxis:{categories:d.weekly_labels||[]},colors:['#2fb344','#d63939'],plotOptions:{bar:{borderRadius:4,columnWidth:'55%'}},grid:{borderColor:'#e6e7e9'},legend:{position:'top'}}).render();
+
+  document.getElementById('chart-classification-breakdown').innerHTML='';
+  new ApexCharts(document.getElementById('chart-classification-breakdown'),{chart:{type:'donut',height:300},series:d.classification_values||[],labels:(d.classification_labels||[]).map(l=>l.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase())),colors:['#2fb344','#206bc4','#f59f00','#d63939','#ae3ec9','#adb5bd'],plotOptions:{pie:{donut:{size:'60%',labels:{show:true,total:{show:true,label:'Total Rows'}}}}},legend:{position:'bottom'}}).render();
+
+  document.getElementById('rejection-tbody').innerHTML=(d.rejection_reasons||[]).map((r,i)=>`<tr><td>${i+1}</td><td><span class="badge bg-red-lt">${r.code}</span></td><td>${r.description}</td><td><strong>${r.count.toLocaleString()}</strong></td><td>${r.pct.toFixed(1)}%</td></tr>`).join('');
+
+  document.getElementById('outlet-coverage').textContent=`${d.outlet_reporting_pct||0}% of outlets reporting`;
+  document.getElementById('chart-outlet-status').innerHTML='';
+  new ApexCharts(document.getElementById('chart-outlet-status'),{chart:{type:'bar',height:220,toolbar:{show:false}},series:[{name:'Outlets',data:d.outlet_reporting_data||[]}],xaxis:{categories:['Active (6/6 wk)','Partial (3-5 wk)','Low (1-2 wk)','Missing (0 wk)']},colors:['#206bc4'],plotOptions:{bar:{borderRadius:4,columnWidth:'50%'}},dataLabels:{enabled:true}}).render();
+
+  document.getElementById('chart-drift').innerHTML='';
+  new ApexCharts(document.getElementById('chart-drift'),{chart:{type:'line',height:220,toolbar:{show:false}},series:[{name:'Accepted Rows',data:d.weekly_accepted||[]},{name:'4-Week Avg',data:d.rolling_avg||[]}],xaxis:{categories:d.weekly_labels||[]},colors:['#206bc4','#f59f00'],stroke:{width:[3,2],dashArray:[0,5]},markers:{size:[4,0]},grid:{borderColor:'#e6e7e9'},legend:{position:'top'}}).render();
+}
+loadDataQuality();
+</script>
+{% endblock %}

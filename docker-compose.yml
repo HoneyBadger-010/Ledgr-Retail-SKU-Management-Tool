@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://sunrise:sunrise_secure@db:5432/sunrise_db
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: sunrise_db
+      POSTGRES_USER: sunrise
+      POSTGRES_PASSWORD: sunrise_secure
+    # Only expose internally — not to host
+    expose:
+      - "5432"
+    restart: unless-stopped
+
+  scheduler:
+    build: .
+    command: python scheduler.py
+    depends_on:
+      - db
+      - web
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://sunrise:sunrise_secure@db:5432/sunrise_db
+    restart: unless-stopped
+
+volumes:
+  pgdata:

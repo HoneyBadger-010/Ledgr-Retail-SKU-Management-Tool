@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Batch & Expiry Tracking{% endblock %}
+{% block page_title %}Batch & Expiry Tracking{% endblock %}
+{% block content %}
+<div class="row row-cards mb-3">
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="kpi-label">Total Batches</div><div class="kpi-value" id="kpi-total">--</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="kpi-label">Expiring < 14 Days</div><div class="kpi-value text-danger" id="kpi-critical">--</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="kpi-label">Expiring < 30 Days</div><div class="kpi-value text-warning" id="kpi-warning">--</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="kpi-label">Healthy Stock</div><div class="kpi-value text-success" id="kpi-ok">--</div></div></div></div>
+</div>
+
+<div id="alert-area" class="mb-3"></div>
+
+<div class="row row-cards mb-3">
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title"><i class="ti ti-chart-donut me-2"></i>Expiry Status Distribution</h3></div>
+      <div class="card-body"><div id="chart-expiry" style="height:300px"><div class="loading-pulse text-center pt-5">Loading...</div></div></div>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title"><i class="ti ti-chart-bar me-2"></i>Days to Expiry by Category</h3></div>
+      <div class="card-body"><div id="chart-category" style="height:300px"><div class="loading-pulse text-center pt-5">Loading...</div></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header">
+    <h3 class="card-title"><i class="ti ti-clock-exclamation me-2"></i>Batch Inventory</h3>
+    <div class="card-actions">
+      <div class="btn-group" role="group">
+        <button class="btn btn-sm btn-outline-danger active" onclick="filterBatch('all',this)">All</button>
+        <button class="btn btn-sm btn-outline-danger" onclick="filterBatch('critical',this)">Critical</button>
+        <button class="btn btn-sm btn-outline-warning" onclick="filterBatch('warning',this)">Warning</button>
+        <button class="btn btn-sm btn-outline-success" onclick="filterBatch('ok',this)">OK</button>
+      </div>
+    </div>
+  </div>
+  <div class="table-responsive" style="max-height:500px;overflow-y:auto">
+    <table class="table table-vcenter table-hover card-table">
+      <thead><tr>
+        <th>SKU</th><th>Product</th><th>Batch No</th><th>Category</th><th>Qty</th>
+        <th>MFD</th><th>Expiry</th><th>Days Left</th><th>Status</th>
+      </tr></thead>
+      <tbody id="batch-tbody"></tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+let allBatches=[];
+async function loadBatches(){
+  allBatches=await(await fetch('/api/batch-expiry')).json();
+  if(allBatches.error){document.getElementById('alert-area').innerHTML='<div class="alert alert-warning">'+allBatches.error+'</div>';return;}
+  const critical=allBatches.filter(b=>b.status==='critical'||b.status==='expired');
+  const warning=allBatches.filter(b=>b.status==='warning');
+  const ok=allBatches.filter(b=>b.status==='ok');
+  document.getElementById('kpi-total').textContent=allBatches.length;
+  document.getElementById('kpi-critical').textContent=critical.length;
+  document.getElementById('kpi-warning').textContent=warning.length;
+  document.getElementById('kpi-ok').textContent=ok.length;
+
+  if(critical.length>0){
+    document.getElementById('alert-area').innerHTML='<div class="alert alert-danger"><i class="ti ti-alert-triangle me-2"></i><strong>'+critical.length+' batches</strong> expiring within 14 days — immediate action required!</div>';
+  }
+
+  document.getElementById('chart-expiry').innerHTML='';
+  new ApexCharts(document.getElementById('chart-expiry'),{chart:{type:'donut',height:280},
+    series:[critical.length,warning.length,ok.length],labels:['Critical (<14d)','Warning (<30d)','OK'],
+    colors:['#d63939','#f59f00','#2fb344'],
+    plotOptions:{pie:{donut:{size:'60%',labels:{show:true,total:{show:true,label:'Batches'}}}}},
+    legend:{position:'bottom'}}).render();
+
+  const cats={};allBatches.forEach(b=>{if(!cats[b.category])cats[b.category]=[];cats[b.category].push(b.days_to_expiry);});
+  document.getElementById('chart-category').innerHTML='';
+  new ApexCharts(document.getElementById('chart-category'),{chart:{type:'bar',height:280,toolbar:{show:false}},
+    series:[{name:'Avg Days to Expiry',data:Object.values(cats).map(arr=>Math.round(arr.reduce((a,b)=>a+b,0)/arr.length))}],
+    xaxis:{categories:Object.keys(cats).map(c=>c.replace(/_/g,' ').replace(/\b\w/g,l=>l.toUpperCase()))},
+    colors:['#206bc4'],plotOptions:{bar:{borderRadius:6,columnWidth:'45%'}},dataLabels:{enabled:true}}).render();
+
+  renderTable(allBatches);
+}
+function renderTable(data){
+  document.getElementById('batch-tbody').innerHTML=data.map(b=>{
+    const statusBadge=b.status==='expired'?'<span class="badge bg-dark">EXPIRED</span>':
+      b.status==='critical'?'<span class="badge bg-red">CRITICAL</span>':
+      b.status==='warning'?'<span class="badge bg-yellow">WARNING</span>':'<span class="badge bg-green">OK</span>';
+    const daysColor=b.days_to_expiry<14?'text-danger fw-bold':b.days_to_expiry<30?'text-warning fw-bold':'text-success';
+    return `<tr><td><strong>${b.sku_id}</strong></td><td>${b.product_name||''}</td><td>${b.batch_no}</td>
+      <td><span class="badge bg-blue-lt">${(b.category||'').replace(/_/g,' ')}</span></td>
+      <td>${b.qty}</td><td>${b.mfd_date}</td><td>${b.expiry_date}</td>
+      <td class="${daysColor}">${b.days_to_expiry}d</td><td>${statusBadge}</td></tr>`;
+  }).join('');
+}
+function filterBatch(status,btn){
+  document.querySelectorAll('.btn-group .btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderTable(status==='all'?allBatches:allBatches.filter(b=>b.status===status));
+}
+loadBatches();
+</script>
+{% endblock %}

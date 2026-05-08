@@ -1,53 +1,113 @@
 {% extends "base.html" %}
 {% block title %}Forecast Accuracy{% endblock %}
-{% block page_title %}Forecast Accuracy Report{% endblock %}
+{% block page_title %}Forecast Accuracy Monitor{% endblock %}
 {% block content %}
-<div class="row row-deck row-cards mb-3">
-  <div class="col-lg-4"><div class="card hero-card"><div class="card-body text-center py-4"><div class="subheader" style="color:rgba(255,255,255,0.7);font-size:12px">OVERALL MODEL ACCURACY</div><div class="display-4 mt-1 fw-bold" id="acc-overall" style="letter-spacing:-0.03em">--</div><p style="color:rgba(255,255,255,0.6);margin:0;font-size:13px">Mean Absolute Percentage Error</p></div></div></div>
-  <div class="col-lg-4"><div class="card kpi-card kpi-primary"><div class="card-body text-center"><div class="subheader" style="color:var(--sunrise-primary)">LightGBM Models</div><div class="h1 mt-2" id="acc-lgbm">--</div><p style="color:#94a3b8;font-size:12px;margin:0">Primary forecasting engine</p></div></div></div>
-  <div class="col-lg-4"><div class="card kpi-card kpi-warning"><div class="card-body text-center"><div class="subheader text-warning">Rolling Avg Fallback</div><div class="h1 mt-2" id="acc-rolling">--</div><p style="color:#94a3b8;font-size:12px;margin:0">Used when LightGBM data insufficient</p></div></div></div>
+<!-- Hero -->
+<div class="card mb-3 hero-card">
+  <div class="card-body d-flex align-items-center justify-content-between">
+    <div>
+      <div class="text-white small fw-bold text-uppercase mb-1" style="letter-spacing:0.06em;opacity:0.7">System-Wide Forecast Accuracy</div>
+      <div class="display-6" id="hero-mape" style="font-size:2rem">--</div>
+      <div style="color:rgba(255,255,255,0.6)" id="hero-subtitle">Loading accuracy data...</div>
+    </div>
+    <div class="text-end">
+      <div id="hero-badge" class="mb-2"></div>
+      <div style="color:rgba(255,255,255,0.6);font-size:13px" id="hero-models">--</div>
+    </div>
+  </div>
 </div>
-<div class="row row-deck row-cards mb-3">
-  <div class="col-lg-6"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-chart-histogram me-2" style="color:var(--sunrise-primary)"></i>MAPE Distribution</h3></div><div class="card-body"><div id="chart-mape-dist" style="height:320px"><div class="loading-pulse text-center pt-5">Loading...</div></div></div></div></div>
-  <div class="col-lg-6"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-list-details me-2" style="color:var(--sunrise-secondary)"></i>Per-SKU Accuracy</h3></div>
-    <div class="card-body" style="max-height:380px;overflow-y:auto">
-      <table class="table table-vcenter table-sm table-hover"><thead><tr><th>SKU</th><th>Model</th><th>MAPE</th><th>Rating</th><th>Accuracy</th></tr></thead>
-      <tbody id="acc-table"></tbody></table>
-    </div></div></div>
+
+<div class="row row-cards mb-3">
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="kpi-label">LightGBM Models</div><div class="kpi-value text-success" id="kpi-lgbm">--</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="kpi-label">Rolling Avg Fallback</div><div class="kpi-value text-warning" id="kpi-rolling">--</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="kpi-label">Low Confidence SKUs</div><div class="kpi-value text-danger" id="kpi-lowconf">--</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="kpi-label">SKUs Forecasted</div><div class="kpi-value" id="kpi-total-fc">--</div></div></div></div>
+</div>
+
+<div class="row row-cards mb-3">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title"><i class="ti ti-chart-bar me-2"></i>MAPE Distribution by Category</h3></div>
+      <div class="card-body"><div id="chart-mape-category" style="height:320px"><div class="loading-pulse text-center pt-5">Loading...</div></div></div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title"><i class="ti ti-chart-donut me-2"></i>Model Usage Split</h3></div>
+      <div class="card-body"><div id="chart-model-split" style="height:320px"><div class="loading-pulse text-center pt-5">Loading...</div></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="row row-cards mb-3">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title"><i class="ti ti-chart-area me-2"></i>MAPE Distribution (All SKUs)</h3></div>
+      <div class="card-body"><div id="chart-mape-histogram" style="height:280px"><div class="loading-pulse text-center pt-5">Loading...</div></div></div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title"><i class="ti ti-arrow-down-right text-danger me-2"></i>Top 10 Least Accurate SKUs</h3></div>
+      <div class="table-responsive">
+        <table class="table table-vcenter card-table">
+          <thead><tr><th>SKU</th><th>Product</th><th>MAPE %</th><th>Model</th><th>Confidence</th></tr></thead>
+          <tbody id="worst-sku-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header"><h3 class="card-title"><i class="ti ti-arrow-up-right text-success me-2"></i>Top 10 Most Accurate SKUs</h3></div>
+  <div class="table-responsive">
+    <table class="table table-vcenter card-table">
+      <thead><tr><th>SKU</th><th>Product</th><th>MAPE %</th><th>Model</th><th>Confidence</th><th>Data Points</th></tr></thead>
+      <tbody id="best-sku-tbody"></tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}
 {% block scripts %}
 <script>
 async function loadAccuracy(){
-  const d=await(await fetch('/api/forecast-accuracy')).json();
+  const r=await fetch('/api/forecast-accuracy');const d=await r.json();
+  const skuList=await(await fetch('/api/sku-list')).json();const skuNames={};skuList.forEach(s=>skuNames[s.sku_id]=s.product_name);
   const mape=d.overall_mape||0;
-  const el=document.getElementById('acc-overall');
-  el.textContent=mape.toFixed(1)+'%';
-  document.getElementById('acc-lgbm').textContent=d.lgbm_count||0;
-  document.getElementById('acc-rolling').textContent=d.rolling_avg_count||0;
-  const perSku=d.per_sku_mape||{};
-  const entries=Object.entries(perSku).sort((a,b)=>a[1].mape-b[1].mape);
-  const tb=document.getElementById('acc-table');tb.innerHTML='';
-  entries.forEach(([sku,info],i)=>{
-    const m=info.mape;
-    const barColor=m<15?'#10b981':m<30?'#f59e0b':'#ef4444';
-    const rating=m<10?'Excellent':m<15?'Good':m<25?'Fair':'Poor';
-    const ratingBadge=m<10?'bg-green':m<15?'bg-blue':m<25?'bg-yellow':'bg-red';
-    tb.innerHTML+=`<tr style="animation:fadeUp ${0.2+i*0.04}s ease forwards"><td style="font-weight:600">${sku}</td><td><span class="badge ${info.model_used==='LightGBM'?'bg-blue':'bg-orange'}">${info.model_used}</span></td><td style="font-weight:700;color:${barColor}">${m.toFixed(1)}%</td><td><span class="badge ${ratingBadge}">${rating}</span></td><td style="width:120px"><div style="background:#e2e8f0;border-radius:4px;height:6px;overflow:hidden"><div style="width:${Math.min(100,100-m)}%;height:100%;background:${barColor};border-radius:4px;transition:width 0.8s ease"></div></div></td></tr>`;
-  });
-  const mapes=entries.map(e=>e[1].mape).filter(m=>m<200);
-  const bins=[0,5,10,15,20,25,30,40,50,100];
-  const counts=bins.slice(0,-1).map((_,i)=>mapes.filter(m=>m>=bins[i]&&m<bins[i+1]).length);
-  const barColors=bins.slice(0,-1).map((b)=>b<15?'#10b981':b<30?'#f59e0b':'#ef4444');
-  document.getElementById('chart-mape-dist').innerHTML='';
-  new ApexCharts(document.getElementById('chart-mape-dist'),{chart:{type:'bar',height:300,toolbar:{show:false},animations:{enabled:true,speed:600}},
-    series:[{name:'SKU Count',data:counts}],
-    xaxis:{categories:bins.slice(0,-1).map((b,i)=>`${b}-${bins[i+1]}%`),labels:{style:{fontSize:'11px',fontWeight:600}}},
-    colors:barColors,
-    plotOptions:{bar:{borderRadius:6,columnWidth:'60%',distributed:true}},
-    grid:{borderColor:'#f1f5f9'},
-    dataLabels:{enabled:true,style:{fontSize:'13px',fontWeight:700}},
-    legend:{show:false}}).render();
+  document.getElementById('hero-mape').textContent=mape.toFixed(1)+'% avg error';
+  const trustLevel=mape<10?'EXCELLENT':mape<15?'GOOD':mape<20?'FAIR':'NEEDS ATTENTION';
+  const trustColor=mape<10?'#2fb344':mape<15?'#206bc4':mape<20?'#f59f00':'#d63939';
+  document.getElementById('hero-badge').innerHTML=`<span class="badge" style="background:${trustColor};font-size:14px;padding:6px 16px">${trustLevel}</span>`;
+  document.getElementById('hero-subtitle').textContent=`${d.total_skus_forecasted||0} SKUs forecasted • ${d.low_confidence_skus?.length||0} need attention`;
+  document.getElementById('hero-models').textContent=`${d.lgbm_count||0} LightGBM • ${d.rolling_avg_count||0} Rolling Avg`;
+  document.getElementById('kpi-lgbm').textContent=d.lgbm_count||0;
+  document.getElementById('kpi-rolling').textContent=d.rolling_avg_count||0;
+  document.getElementById('kpi-lowconf').textContent=d.low_confidence_skus?.length||0;
+  document.getElementById('kpi-total-fc').textContent=d.total_skus_forecasted||0;
+
+  const perSku=d.per_sku_mape||{};const skuArr=Object.entries(perSku).map(([id,info])=>({id,...info,name:skuNames[id]||id}));const sorted=skuArr.sort((a,b)=>a.mape-b.mape);
+
+  // Category MAPE
+  const catMape={};skuArr.forEach(s=>{const cat=skuList.find(x=>x.sku_id===s.id)?.category||'unknown';if(!catMape[cat])catMape[cat]=[];catMape[cat].push(s.mape);});
+  document.getElementById('chart-mape-category').innerHTML='';
+  new ApexCharts(document.getElementById('chart-mape-category'),{chart:{type:'bar',height:300,toolbar:{show:false}},series:[{name:'Avg MAPE %',data:Object.values(catMape).map(arr=>Math.round(arr.reduce((a,b)=>a+b,0)/arr.length*10)/10)}],xaxis:{categories:Object.keys(catMape).map(c=>c.replace(/_/g,' ').replace(/\b\w/g,l=>l.toUpperCase()))},colors:['#206bc4'],plotOptions:{bar:{borderRadius:6,columnWidth:'45%',distributed:true}},dataLabels:{enabled:true,formatter:v=>v+'%'},legend:{show:false}}).render();
+
+  document.getElementById('chart-model-split').innerHTML='';
+  new ApexCharts(document.getElementById('chart-model-split'),{chart:{type:'donut',height:300},series:[d.lgbm_count||0,d.rolling_avg_count||0],labels:['LightGBM','Rolling Average'],colors:['#206bc4','#f59f00'],plotOptions:{pie:{donut:{size:'65%',labels:{show:true,total:{show:true,label:'Total'}}}}},legend:{position:'bottom'}}).render();
+
+  const bins=[0,0,0,0,0];skuArr.forEach(s=>{if(s.mape<=5)bins[0]++;else if(s.mape<=10)bins[1]++;else if(s.mape<=20)bins[2]++;else if(s.mape<=30)bins[3]++;else bins[4]++;});
+  document.getElementById('chart-mape-histogram').innerHTML='';
+  new ApexCharts(document.getElementById('chart-mape-histogram'),{chart:{type:'bar',height:260,toolbar:{show:false}},series:[{name:'SKUs',data:bins}],xaxis:{categories:['0-5%','5-10%','10-20%','20-30%','30%+']},colors:['#2fb344','#206bc4','#f59f00','#f76707','#d63939'],plotOptions:{bar:{borderRadius:4,columnWidth:'50%',distributed:true}},dataLabels:{enabled:true},legend:{show:false}}).render();
+
+  const worst=sorted.slice(-10).reverse();
+  document.getElementById('worst-sku-tbody').innerHTML=worst.map(s=>{
+    const conf=s.mape>30?'<span class="badge bg-red">Low</span>':s.mape>15?'<span class="badge bg-yellow">Medium</span>':'<span class="badge bg-green">High</span>';
+    return `<tr><td><strong>${s.id}</strong></td><td>${s.name}</td><td><strong>${s.mape}%</strong></td><td><span class="badge ${s.model_used==='LightGBM'?'bg-purple':'bg-orange'}">${s.model_used}</span></td><td>${conf}</td></tr>`;
+  }).join('');
+
+  const best=sorted.slice(0,10);
+  document.getElementById('best-sku-tbody').innerHTML=best.map(s=>`<tr><td><strong>${s.id}</strong></td><td>${s.name}</td><td><strong>${s.mape}%</strong></td><td><span class="badge ${s.model_used==='LightGBM'?'bg-purple':'bg-orange'}">${s.model_used}</span></td><td><span class="badge bg-green">High</span></td><td>${s.non_zero_datapoints||'--'}</td></tr>`).join('');
 }
 loadAccuracy();
 </script>

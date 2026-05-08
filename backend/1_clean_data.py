@@ -93,10 +93,26 @@ def run():
     step1_count = (merged["row_classification"] == "missing_data").sum()
     print(f"  Step 1: {step1_count:,} rows -> missing_data (non-reporting outlets)")
 
-    # ── STEP 2: Stockout gap detection ──
-    print("[1_clean_data] Step 2: Stockout gap detection...")
-    # SKUs with warehouse_stock == 0 or very low
-    zero_stock_skus = inventory[inventory["warehouse_stock"] <= 20]["sku_id"].tolist()
+    # ── STEP 2: Stockout gap detection (MOQ-based threshold — Brief Part 4, Bug 1) ──
+    print("[1_clean_data] Step 2: Stockout gap detection (MOQ-based)...")
+    # Load SKU master for MOQ-based thresholds
+    sku_master = pd.read_csv(os.path.join(data_dir, "sku_master.csv"))
+    sku_moq_map = dict(zip(sku_master["sku_id"], sku_master["moq_from_supplier"]))
+
+    # For each SKU, use its MOQ as the stockout threshold instead of hardcoded 20
+    zero_stock_skus = []
+    for _, inv_row in inventory.iterrows():
+        sku = inv_row["sku_id"]
+        wh_stock = inv_row["warehouse_stock"]
+        moq = sku_moq_map.get(sku, None)
+        # Use MOQ as threshold; fallback to 20 if MOQ is missing or invalid
+        if pd.isna(moq) or moq <= 0:
+            threshold = 20  # fallback for data errors
+            print(f"  WARNING: SKU {sku} has invalid MOQ ({moq}), using fallback threshold=20")
+        else:
+            threshold = int(moq)
+        if wh_stock < threshold:
+            zero_stock_skus.append(sku)
 
     for sku in zero_stock_skus:
         mask = (
@@ -107,7 +123,7 @@ def run():
         merged.loc[mask, "row_classification"] = "stockout_gap"
 
     step2_count = (merged["row_classification"] == "stockout_gap").sum()
-    print(f"  Step 2: {step2_count:,} rows -> stockout_gap")
+    print(f"  Step 2: {step2_count:,} rows -> stockout_gap (MOQ-based, {len(zero_stock_skus)} SKUs below threshold)")
 
     # ── STEP 3: Channel frequency baseline ──
     print("[1_clean_data] Step 3: SKU-outlet sell frequency...")
@@ -142,18 +158,78 @@ def run():
     low_freq = still_unclassified & (merged["sell_frequency"] < 0.2)
     merged.loc[low_freq, "row_classification"] = "missing_data"
 
-    # Mid frequency -> uncertain (treat conservatively as true_zero for forecasting)
+    # ── Uncertain band (0.2–0.6): Channel-aware sub-rules (Brief Part 4, Bug 2) ──
+    # Load outlet channel info and calendars
+    outlet_master = pd.read_csv(os.path.join(data_dir, "outlet_master.csv"))
+    outlet_channel_map = dict(zip(outlet_master["outlet_id"], outlet_master["channel"]))
+
+    festive = pd.read_csv(os.path.join(data_dir, "festive_calendar.csv"))
+    festive["date"] = pd.to_datetime(festive["date"])
+    festive_dates = set()
+    for _, f in festive.iterrows():
+        # Mark the week containing each festive date
+        for w in all_weeks:
+            if abs((pd.Timestamp(w) - f["date"]).days) <= 3:
+                festive_dates.add(w)
+                break
+
+    promos = pd.read_csv(os.path.join(data_dir, "promotions_calendar.csv"))
+    promos["start_date"] = pd.to_datetime(promos["start_date"])
+    promos["end_date"] = pd.to_datetime(promos["end_date"])
+    promo_weeks = set()
+    for _, p in promos.iterrows():
+        for w in all_weeks:
+            wt = pd.Timestamp(w)
+            if p["start_date"] <= wt <= p["end_date"]:
+                promo_weeks.add(w)
+
+    # SKU category map for medical channel logic
+    sku_category_map = dict(zip(sku_master["sku_id"], sku_master["category"]))
+
     mid_freq = still_unclassified & (merged["sell_frequency"] >= 0.2) & (merged["sell_frequency"] <= 0.6)
-    merged.loc[mid_freq, "row_classification"] = "uncertain"
+    mid_indices = merged.index[mid_freq]
+
+    # Sub-rule 1: Festive/promotional weeks → true_zero (demand likely real)
+    festive_or_promo = merged.loc[mid_indices, "week_start_date"].isin(festive_dates | promo_weeks)
+    merged.loc[mid_indices[festive_or_promo], "row_classification"] = "true_zero"
+
+    # Remaining uncertain rows after sub-rule 1
+    still_mid = (merged["row_classification"] == "unclassified") & mid_freq
+
+    # Sub-rule 2: Channel-based classification
+    merged["_outlet_channel"] = merged["outlet_id"].map(outlet_channel_map)
+    merged["_sku_category"] = merged["sku_id"].map(sku_category_map)
+
+    # Kirana/informal → missing_data (exclude from training)
+    kirana_mask = still_mid & merged["_outlet_channel"].isin(["kirana", "informal"])
+    merged.loc[kirana_mask, "row_classification"] = "missing_data"
+
+    # Supermarket/modern_trade → true_zero (include in training as zero)
+    supermarket_mask = still_mid & (merged["row_classification"] == "unclassified") & merged["_outlet_channel"].isin(["supermarket", "modern_trade"])
+    merged.loc[supermarket_mask, "row_classification"] = "true_zero"
+
+    # Medical channel: healthcare/pharmaceutical → true_zero, others → missing_data
+    medical_mask = still_mid & (merged["row_classification"] == "unclassified") & (merged["_outlet_channel"] == "medical")
+    medical_healthcare = medical_mask & merged["_sku_category"].isin(["pharmaceutical", "healthcare"])
+    medical_other = medical_mask & ~merged["_sku_category"].isin(["pharmaceutical", "healthcare"])
+    merged.loc[medical_healthcare, "row_classification"] = "true_zero"
+    merged.loc[medical_other, "row_classification"] = "missing_data"
+
+    # Sub-rule 3: Default — uncertain_excluded (exclude from training, keep for audit)
+    remaining_uncertain = (merged["row_classification"] == "unclassified") & mid_freq
+    merged.loc[remaining_uncertain, "row_classification"] = "uncertain_excluded"
+
+    # Clean up temp columns
+    merged.drop(columns=["_outlet_channel", "_sku_category"], inplace=True)
 
     # Any remaining unclassified -> true_zero (conservative)
     remaining = merged["row_classification"] == "unclassified"
     merged.loc[remaining, "row_classification"] = "true_zero"
 
     step3_tz = (merged["row_classification"] == "true_zero").sum()
-    step3_unc = (merged["row_classification"] == "uncertain").sum()
+    step3_unc = (merged["row_classification"] == "uncertain_excluded").sum()
     step3_md_total = (merged["row_classification"] == "missing_data").sum()
-    print(f"  Step 3: {step3_tz:,} true_zero, {step3_unc:,} uncertain, {step3_md_total:,} total missing_data")
+    print(f"  Step 3: {step3_tz:,} true_zero, {step3_unc:,} uncertain_excluded, {step3_md_total:,} total missing_data")
 
     # ── Save outputs ──
     output_cols = [c for c in merged.columns if c not in ["sell_frequency", "was_observed"]]

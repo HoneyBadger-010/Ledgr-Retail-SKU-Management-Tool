@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Outlets{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+  <h2 style="margin:0;font-size:22px;font-weight:700">Outlet Network Master</h2>
+</div>
+
+<!-- Toolbar -->
+<div class="df-toolbar">
+  <button class="df-btn-outline"><i class="ti ti-filter"></i>Filter</button>
+  <select class="df-btn-outline" style="padding:6px 12px;cursor:pointer">
+    <option>All Channels</option><option>Kirana</option><option>Supermarket</option><option>Modern Trade</option><option>Standalone</option>
+  </select>
+  <div style="flex:1"></div>
+  <button class="df-btn-outline"><i class="ti ti-chart-bar"></i>Analyze Channel Performance</button>
+  <button class="df-btn-outline"><i class="ti ti-download"></i>Export CSV</button>
+  <button class="btn btn-primary" style="font-size:13px;padding:7px 18px;border-radius:6px"><i class="ti ti-plus me-1"></i>Add New Outlet</button>
+</div>
+
+<!-- Table -->
+<div class="df-card">
+  <div style="overflow-x:auto">
+    <table class="df-table" id="outlets-table">
+      <thead><tr>
+        <th>Outlet ID</th><th>Outlet Name</th><th>Channel Type</th><th>Location Area</th>
+        <th>Weekly Volume ₹</th><th>Growth %</th><th>Service Status</th><th>Last Invoice</th>
+        <th>Assigned Salesman</th><th>Actions</th>
+      </tr></thead>
+      <tbody id="outlets-tbody"></tbody>
+    </table>
+  </div>
+  <div class="df-pagination">
+    <span>Showing 1 to 10 of 320 outlets</span>
+    <div class="df-pagination-btns">
+      <button><i class="ti ti-chevron-left"></i> Prev</button>
+      <button class="active">1</button><button>2</button><button>3</button>
+      <button>Next <i class="ti ti-chevron-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- Right Panel -->
+<aside class="df-right-panel" id="outlet-panel">
+  <div class="df-right-panel-header">
+    <h4 id="op-title">Outlet Insights</h4>
+    <button class="df-right-panel-close" onclick="closeOutletPanel()"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="df-right-panel-body">
+    <div style="font-size:12px;color:#64748B;margin-bottom:12px" id="op-subtitle">--</div>
+    <div style="font-size:13px;font-weight:600;margin-bottom:8px">Demand Consistency</div>
+    <canvas id="op-demand-chart" height="100"></canvas>
+    <div style="font-size:13px;font-weight:600;margin:16px 0 8px">Channel Breakdown</div>
+    <canvas id="op-channel-chart" height="120"></canvas>
+    <div id="op-details" style="font-size:13px;color:#475569;margin-top:12px;line-height:1.7"></div>
+  </div>
+</aside>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const outlets=[
+  {id:'0000001',name:'Kothrud Supermarket',channel:'Supermarket',area:'Kothrud',volume:68500,growth:12.3,status:'ACTIVE',invoice:'2026-11-05',salesman:'Amit Patil'},
+  {id:'0000012',name:'Hadapsar Kirana Store',channel:'Kirana',area:'Hadapsar',volume:32100,growth:5.2,status:'ACTIVE',invoice:'2026-11-04',salesman:'Vijay Kumar'},
+  {id:'0000023',name:'Hinjewadi Mart Plus',channel:'Modern Trade',area:'Hinjewadi',volume:71200,growth:18.7,status:'ACTIVE',invoice:'2026-11-06',salesman:'Suresh Deshmukh'},
+  {id:'0000034',name:'Pune Central General',channel:'Standalone',area:'Pune Camp',volume:28900,growth:-3.1,status:'RISK (Low Vol)',invoice:'2026-10-28',salesman:'Ravi Joshi'},
+  {id:'0000045',name:'Deccan Fresh Foods',channel:'Kirana',area:'Deccan',volume:41300,growth:8.9,status:'ACTIVE',invoice:'2026-11-05',salesman:'Amit Patil'},
+  {id:'0000056',name:'Baner Quick Shop',channel:'Kirana',area:'Baner',volume:36700,growth:2.1,status:'ACTIVE',invoice:'2026-11-03',salesman:'Vijay Kumar'},
+  {id:'0000067',name:'Wakad Hypermart',channel:'Supermarket',area:'Wakad',volume:55800,growth:15.4,status:'ACTIVE',invoice:'2026-11-06',salesman:'Suresh Deshmukh'},
+  {id:'0000078',name:'Shivajinagar Medical',channel:'Standalone',area:'Shivajinagar',volume:18200,growth:-8.5,status:'PAUSED',invoice:'2026-10-15',salesman:'Ravi Joshi'},
+  {id:'0000089',name:'Viman Nagar Retail',channel:'Modern Trade',area:'Viman Nagar',volume:62400,growth:11.2,status:'ACTIVE',invoice:'2026-11-05',salesman:'Amit Patil'},
+  {id:'0000110',name:'Nashik Road Depot',channel:'Kirana',area:'Nashik',volume:29800,growth:1.8,status:'RISK (Low Vol)',invoice:'2026-10-30',salesman:'Vijay Kumar'},
+];
+
+function renderOutlets(){
+  document.getElementById('outlets-tbody').innerHTML=outlets.map(o=>{
+    const chBadge=o.channel==='Kirana'?'<span class="df-flag" style="background:#DBEAFE;color:#1D4ED8">'+o.channel+'</span>':
+      o.channel==='Supermarket'?'<span class="df-flag df-flag-ok">'+o.channel+'</span>':
+      o.channel==='Modern Trade'?'<span class="df-flag" style="background:#E0E7FF;color:#4338CA">'+o.channel+'</span>':
+      '<span class="df-flag" style="background:#F1F5F9;color:#64748B">'+o.channel+'</span>';
+    const stBadge=o.status==='ACTIVE'?'<span class="df-flag df-flag-ok">ACTIVE</span>':
+      o.status.includes('RISK')?'<span class="df-flag" style="background:#FEFCE8;color:#A16207">RISK (Low Vol)</span>':
+      '<span class="df-flag df-flag-critical">PAUSED</span>';
+    const growthColor=o.growth>=0?'color:#16A34A':'color:#DC2626';
+    return`<tr onclick="selectOutlet('${o.id}',this)">
+      <td style="font-weight:600;color:#3B82F6">${o.id}</td>
+      <td>${o.name}</td><td>${chBadge}</td><td>${o.area}</td>
+      <td>₹${o.volume.toLocaleString('en-IN')}</td>
+      <td style="${growthColor};font-weight:600">${o.growth>0?'+':''}${o.growth}%</td>
+      <td>${stBadge}</td><td>${o.invoice}</td><td>${o.salesman}</td>
+      <td><button class="df-btn-outline" style="padding:3px 8px;font-size:11px" onclick="event.stopPropagation()"><i class="ti ti-eye"></i> View</button> <button class="df-btn-outline" style="padding:3px 8px;font-size:11px" onclick="event.stopPropagation()"><i class="ti ti-pencil"></i> Edit</button></td>
+    </tr>`;
+  }).join('');
+}
+
+let demandChart=null,channelChart=null;
+function selectOutlet(id,tr){
+  document.querySelectorAll('.df-table tbody tr').forEach(r=>r.classList.remove('selected'));
+  tr.classList.add('selected');
+  const o=outlets.find(x=>x.id===id);if(!o)return;
+  document.getElementById('op-title').textContent='Outlet Insights';
+  document.getElementById('op-subtitle').textContent=o.name+' • '+o.area+' • '+o.channel;
+  document.getElementById('op-details').innerHTML=`<p><strong>Weekly Volume:</strong> ₹${o.volume.toLocaleString('en-IN')}</p><p><strong>Growth:</strong> ${o.growth}%</p><p><strong>Salesman:</strong> ${o.salesman}</p>`;
+  if(demandChart)demandChart.destroy();
+  demandChart=new Chart(document.getElementById('op-demand-chart'),{type:'line',data:{labels:['W1','W2','W3','W4','W5','W6','W7','W8'],datasets:[{data:[o.volume*0.8,o.volume*0.9,o.volume,o.volume*1.1,o.volume*0.95,o.volume*1.05,o.volume*1.1,o.volume*1.15].map(v=>Math.round(v/1000)),borderColor:'#3B82F6',borderWidth:2,fill:true,backgroundColor:'rgba(59,130,246,0.08)',tension:0.4,pointRadius:2}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#E2E8F0'},ticks:{font:{size:10},callback:v=>v+'k'}}}}});
+  if(channelChart)channelChart.destroy();
+  channelChart=new Chart(document.getElementById('op-channel-chart'),{type:'bar',data:{labels:['Kirana','Supermarket','Modern Trade','Standalone'],datasets:[{data:[42,28,18,12],backgroundColor:['#3B82F6','#22C55E','#8B5CF6','#94A3B8'],borderRadius:4}]},options:{responsive:true,indexAxis:'horizontal',plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#E2E8F0'},ticks:{font:{size:10}}}}}});
+  document.getElementById('outlet-panel').classList.add('open');
+  document.querySelector('.df-main').classList.add('panel-open');
+}
+function closeOutletPanel(){document.getElementById('outlet-panel').classList.remove('open');document.querySelector('.df-main').classList.remove('panel-open');}
+renderOutlets();
+</script>
+{% endblock %}

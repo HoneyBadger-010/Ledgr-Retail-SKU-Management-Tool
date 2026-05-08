@@ -3,16 +3,16 @@
 {% block page_title %}SKU Classification & ABC Analysis{% endblock %}
 {% block content %}
 <div class="row row-deck row-cards mb-3">
-  <div class="col-sm-6 col-lg-3"><div class="card kpi-card kpi-success"><div class="card-body"><div class="d-flex align-items-center gap-2"><div style="width:10px;height:10px;border-radius:50%;background:#10b981"></div><div class="subheader text-success">Fast Movers</div></div><div class="h1 mt-2" id="cls-fast">--</div><div id="cls-fast-list" class="mt-2" style="font-size:12px;color:#64748b;line-height:1.8"></div></div></div></div>
-  <div class="col-sm-6 col-lg-3"><div class="card kpi-card"><div class="card-body"><div class="d-flex align-items-center gap-2"><div style="width:10px;height:10px;border-radius:50%;background:#64748b"></div><div class="subheader">Slow Movers</div></div><div class="h1 mt-2" id="cls-slow">--</div><div id="cls-slow-list" class="mt-2" style="font-size:12px;color:#64748b;line-height:1.8"></div></div></div></div>
-  <div class="col-sm-6 col-lg-3"><div class="card kpi-card kpi-warning"><div class="card-body"><div class="d-flex align-items-center gap-2"><div style="width:10px;height:10px;border-radius:50%;background:#f97316"></div><div class="subheader text-warning">Seasonal</div></div><div class="h1 mt-2" id="cls-seasonal">--</div><div id="cls-seasonal-list" class="mt-2" style="font-size:12px;color:#64748b;line-height:1.8"></div></div></div></div>
-  <div class="col-sm-6 col-lg-3"><div class="card kpi-card kpi-danger"><div class="card-body"><div class="d-flex align-items-center gap-2"><div style="width:10px;height:10px;border-radius:50%;background:#ef4444"></div><div class="subheader text-danger">Dead Stock</div></div><div class="h1 mt-2" id="cls-dead">--</div><div id="cls-dead-list" class="mt-2" style="font-size:12px;color:#64748b;line-height:1.8"></div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="d-flex align-items-center gap-2"><div style="width:10px;height:10px;border-radius:50%;background:#2fb344"></div><div class="kpi-label">Fast Movers</div></div><div class="kpi-value text-success" id="cls-fast">--</div><div id="cls-fast-list" class="mt-2" style="font-size:12px;color:#626976;line-height:1.8"></div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="d-flex align-items-center gap-2"><div style="width:10px;height:10px;border-radius:50%;background:#626976"></div><div class="kpi-label">Slow Movers</div></div><div class="kpi-value" id="cls-slow">--</div><div id="cls-slow-list" class="mt-2" style="font-size:12px;color:#626976;line-height:1.8"></div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="d-flex align-items-center gap-2"><div style="width:10px;height:10px;border-radius:50%;background:#f76707"></div><div class="kpi-label">Seasonal</div></div><div class="kpi-value text-warning" id="cls-seasonal">--</div><div id="cls-seasonal-list" class="mt-2" style="font-size:12px;color:#626976;line-height:1.8"></div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="d-flex align-items-center gap-2"><div style="width:10px;height:10px;border-radius:50%;background:#d63939"></div><div class="kpi-label">Dead Stock</div></div><div class="kpi-value text-danger" id="cls-dead">--</div><div id="cls-dead-list" class="mt-2" style="font-size:12px;color:#626976;line-height:1.8"></div></div></div></div>
 </div>
 <div class="row row-deck row-cards mb-3">
-  <div class="col-lg-6"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-chart-bar me-2" style="color:var(--sunrise-primary)"></i>Top 20 by Sales Volume</h3></div><div class="card-body"><div id="chart-top20" style="height:400px"><div class="loading-pulse text-center pt-5">Loading...</div></div></div></div></div>
-  <div class="col-lg-6"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-chart-dots me-2" style="color:var(--sunrise-secondary)"></i>Velocity vs Consistency</h3></div><div class="card-body"><div id="chart-scatter" style="height:400px"><div class="loading-pulse text-center pt-5">Loading...</div></div></div></div></div>
+  <div class="col-lg-6"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-chart-bar me-2"></i>Top 20 by Sales Volume</h3></div><div class="card-body"><div id="chart-top20" style="height:400px"><div class="loading-pulse text-center pt-5">Loading...</div></div></div></div></div>
+  <div class="col-lg-6"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-chart-dots me-2"></i>Velocity vs Consistency</h3></div><div class="card-body"><div id="chart-scatter" style="height:400px"><div class="loading-pulse text-center pt-5">Loading...</div></div></div></div></div>
 </div>
-<div class="row mb-3"><div class="col-12"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-diamond me-2" style="color:var(--sunrise-accent)"></i>ABC Revenue Analysis</h3></div>
+<div class="row mb-3"><div class="col-12"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-diamond me-2"></i>ABC Revenue Analysis</h3></div>
   <div class="table-responsive"><table class="table table-vcenter"><thead><tr><th>Class</th><th>SKU Count</th><th>Revenue</th><th>% of Total</th><th>Distribution</th></tr></thead><tbody id="abc-table"></tbody></table></div>
 </div></div></div>
 {% endblock %}
@@ -35,16 +35,16 @@ async function loadClassification(){
     series:[{name:'Avg Weekly Sales',data:top20.map(s=>Math.round(s.avg_weekly_sales))}],
     xaxis:{categories:top20.map(s=>(s.product_name||'').substring(0,18)),labels:{style:{fontSize:'10px',fontWeight:600}}},
     plotOptions:{bar:{horizontal:true,borderRadius:5,barHeight:'55%'}},
-    colors:['#6366f1'],grid:{borderColor:'#f1f5f9'},
+    colors:['#206bc4'],grid:{borderColor:'#e6e7e9'},
     dataLabels:{enabled:true,style:{fontSize:'11px',fontWeight:700}}}).render();
-  const colorMap={fast_mover:'#10b981',slow_mover:'#64748b',seasonal:'#f97316',dead_stock:'#ef4444'};
+  const colorMap={fast_mover:'#2fb344',slow_mover:'#626976',seasonal:'#f76707',dead_stock:'#d63939'};
   const series=Object.keys(groups).map(k=>({name:k.replace(/_/g,' ').replace(/\b\w/g,l=>l.toUpperCase()),data:(groups[k]||[]).map(s=>({x:Math.round(s.avg_weekly_sales),y:Math.round((s.presence_pct||0)*100)/100,name:s.product_name}))}));
   document.getElementById('chart-scatter').innerHTML='';
   new ApexCharts(document.getElementById('chart-scatter'),{chart:{type:'scatter',height:380,toolbar:{show:false},animations:{enabled:true}},
     series:series,xaxis:{title:{text:'Avg Weekly Sales',style:{fontWeight:700}},labels:{style:{fontSize:'11px'}}},yaxis:{title:{text:'Consistency (presence ratio)',style:{fontWeight:700}},max:1,labels:{style:{fontSize:'11px'}}},
     colors:Object.values(colorMap),
     markers:{size:8,strokeWidth:2,strokeColors:'#fff',hover:{size:12}},
-    grid:{borderColor:'#f1f5f9'},
+    grid:{borderColor:'#e6e7e9'},
     tooltip:{custom:({seriesIndex,dataPointIndex,w})=>{const p=w.config.series[seriesIndex].data[dataPointIndex];return `<div style="padding:8px 12px;font-weight:600">${p.name}<br><span style="font-weight:400;font-size:12px">Sales: ${p.x} | Consistency: ${(p.y*100).toFixed(0)}%</span></div>`;}}}).render();
   const abc={A:{count:0,rev:0},B:{count:0,rev:0},C:{count:0,rev:0}};
   let totalRev=data.reduce((a,s)=>a+(s.total_revenue||0),0);
@@ -53,7 +53,7 @@ async function loadClassification(){
   const abcColors={A:'bg-green',B:'bg-yellow',C:'bg-red'};
   ['A','B','C'].forEach(c=>{
     const pct=totalRev?(abc[c].rev/totalRev*100):0;
-    tb.innerHTML+=`<tr><td><span class="badge ${abcColors[c]}" style="font-size:13px;padding:5px 14px">${c}-Class</span></td><td style="font-weight:700;font-size:15px">${abc[c].count}</td><td style="font-weight:600">Rs.${abc[c].rev.toLocaleString('en-IN')}</td><td style="font-weight:700">${pct.toFixed(1)}%</td><td style="width:200px"><div style="background:#e2e8f0;border-radius:4px;height:8px;overflow:hidden"><div style="width:${pct}%;height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6);border-radius:4px;transition:width 1s ease"></div></div></td></tr>`;
+    tb.innerHTML+=`<tr><td><span class="badge ${abcColors[c]}" style="font-size:13px;padding:5px 14px">${c}-Class</span></td><td style="font-weight:700;font-size:15px">${abc[c].count}</td><td style="font-weight:600">Rs.${abc[c].rev.toLocaleString('en-IN')}</td><td style="font-weight:700">${pct.toFixed(1)}%</td><td style="width:200px"><div style="background:#e6e7e9;border-radius:4px;height:8px;overflow:hidden"><div style="width:${pct}%;height:100%;background:#206bc4;border-radius:4px;transition:width 1s ease"></div></div></td></tr>`;
   });
 }
 loadClassification();

@@ -3,377 +3,298 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>{% block title %}Sunrise Demand AI{% endblock %} — Sunrise Consumer Goods</title>
+  <title>{% block title %}Dashboard{% endblock %} — DeltaForecast</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.2.0/dist/css/tabler.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@latest/dist/chart.umd.min.js"></script>
   <style>
     :root {
-      --sunrise-primary: #6366f1;
-      --sunrise-secondary: #8b5cf6;
-      --sunrise-accent: #f59e0b;
-      --sunrise-danger: #ef4444;
-      --sunrise-success: #10b981;
-      --sunrise-warning: #f97316;
-      --sunrise-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 30%, #ec4899 60%, #f59e0b 100%);
-      --sunrise-gradient-subtle: linear-gradient(135deg, #6366f110 0%, #8b5cf610 30%, #ec489910 60%, #f59e0b10 100%);
-      --glass-bg: rgba(255,255,255,0.7);
-      --glass-border: rgba(255,255,255,0.3);
-      --shadow-soft: 0 4px 24px rgba(0,0,0,0.06);
-      --shadow-hover: 0 8px 32px rgba(99,102,241,0.15);
+      --df-navy: #0D1B2A;
+      --df-bg: #F0F4F8;
+      --df-card: #ffffff;
+      --df-border: #E2E8F0;
+      --df-text: #1E293B;
+      --df-muted: #64748B;
+      --df-blue: #3B82F6;
+      --df-green: #22C55E;
+      --df-red: #EF4444;
+      --df-orange: #F97316;
+      --df-yellow: #EAB308;
     }
-    * { font-family: 'Inter', -apple-system, sans-serif !important; }
-    body { background: #f0f2f8; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; font-size: 14px; background: var(--df-bg); color: var(--df-text); margin: 0; }
 
-    /* ── Animated Gradient Strips ── */
-    .gradient-strip-top, .gradient-strip-bottom {
-      position: fixed; left: 0; right: 0; height: 4px; z-index: 9999;
-      background: var(--sunrise-gradient); background-size: 300% 300%;
-      animation: gradientShift 4s ease infinite;
+    /* ── SIDEBAR ── */
+    .df-sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0; width: 210px; background: var(--df-navy);
+      display: flex; flex-direction: column; z-index: 100; overflow-y: auto;
     }
-    .gradient-strip-top { top: 0; }
-    .gradient-strip-bottom { bottom: 0; }
-    @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    .df-sidebar::-webkit-scrollbar { width: 0; }
+    .df-brand { display: flex; align-items: center; gap: 8px; padding: 18px 16px 20px; }
+    .df-brand-icon { width: 28px; height: 28px; }
+    .df-brand-icon svg { width: 28px; height: 28px; }
+    .df-brand-text { font-size: 17px; font-weight: 700; color: #fff; }
+    .df-brand-text span { color: #60A5FA; }
+    .df-nav { flex: 1; padding: 0 8px; }
+    .df-nav-item {
+      display: flex; align-items: center; gap: 10px; padding: 0 12px; height: 40px;
+      color: rgba(255,255,255,0.65); font-size: 13px; font-weight: 500; text-decoration: none;
+      border-radius: 6px; margin-bottom: 2px; transition: all 0.15s; position: relative;
+      border-left: 3px solid transparent;
     }
+    .df-nav-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+    .df-nav-item.active { background: rgba(255,255,255,0.07); color: #fff; border-left-color: var(--df-blue); }
+    .df-nav-item i { font-size: 18px; opacity: 0.7; width: 20px; text-align: center; }
+    .df-nav-item.active i { opacity: 1; }
+    .df-nav-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--df-blue); margin-left: auto; }
+    .df-nav-bottom { padding: 8px; border-top: 1px solid rgba(255,255,255,0.08); margin-top: auto; }
 
-    /* ── Sidebar ── */
-    .navbar-vertical {
-      background: linear-gradient(180deg, #1e1b4b 0%, #312e81 50%, #3730a3 100%) !important;
-      border-right: none !important;
-      box-shadow: 4px 0 24px rgba(30,27,75,0.3);
+    /* ── TOP BAR ── */
+    .df-topbar {
+      position: fixed; top: 0; left: 210px; right: 0; height: 56px; background: #fff;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+      border-bottom: 1px solid var(--df-border); z-index: 99;
     }
-    .navbar-vertical .nav-link {
-      border-radius: 10px; margin: 2px 12px; padding: 10px 14px;
-      transition: all 0.3s cubic-bezier(0.4,0,0.2,1); color: rgba(255,255,255,0.65) !important;
-      font-weight: 500; letter-spacing: 0.01em;
+    .df-search { position: relative; }
+    .df-search input {
+      width: 280px; height: 36px; border: 1px solid #D1D5DB; border-radius: 8px;
+      padding: 0 12px 0 36px; font-size: 13px; color: var(--df-text); background: #fff; outline: none;
     }
-    .navbar-vertical .nav-link:hover {
-      background: rgba(255,255,255,0.12) !important; color: #fff !important;
-      transform: translateX(4px);
+    .df-search input:focus { border-color: var(--df-blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .df-search i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9CA3AF; font-size: 16px; }
+    .df-topbar-right { display: flex; align-items: center; gap: 16px; }
+    .df-topbar-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--df-muted); cursor: pointer; position: relative; transition: background 0.15s; }
+    .df-topbar-icon:hover { background: #F1F5F9; }
+    .df-topbar-icon i { font-size: 20px; }
+    .df-topbar-icon .dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--df-red); border: 2px solid #fff; }
+    .df-user { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 4px 8px; border-radius: 8px; }
+    .df-user:hover { background: #F1F5F9; }
+    .df-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--df-blue); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px; }
+    .df-user-name { font-size: 13px; font-weight: 600; color: var(--df-text); }
+    .df-user-chevron { color: #9CA3AF; font-size: 14px; }
+    .df-monday-pill {
+      display: inline-flex; align-items: center; gap: 6px; background: #DCFCE7; color: #15803D;
+      padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap;
     }
-    .navbar-vertical .nav-link.active {
-      background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
-      color: #fff !important; box-shadow: 0 4px 16px rgba(99,102,241,0.4);
-      transform: translateX(2px);
-    }
-    .navbar-vertical .nav-link-icon { opacity: 0.8; }
-    .navbar-vertical .nav-link.active .nav-link-icon { opacity: 1; }
-    .navbar-brand-autodark span {
-      background: linear-gradient(135deg, #fbbf24, #f59e0b, #f97316);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      font-weight: 800; font-size: 22px !important; letter-spacing: -0.5px;
-    }
+    .df-monday-pill .dot { width: 8px; height: 8px; border-radius: 50%; background: #16A34A; }
 
-    /* ── Page Header ── */
-    .page-header {
-      background: linear-gradient(135deg, rgba(99,102,241,0.04) 0%, rgba(139,92,246,0.06) 100%);
-      border-bottom: 1px solid rgba(99,102,241,0.08); padding-top: 20px !important;
-    }
-    .page-pretitle { color: var(--sunrise-secondary); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; font-size: 11px; }
-    .page-title { font-weight: 800; letter-spacing: -0.03em; font-size: 1.6rem; color: #1e1b4b; }
+    /* ── MAIN CONTENT ── */
+    .df-main { margin-left: 210px; margin-top: 56px; padding: 24px; min-height: calc(100vh - 56px); }
 
-    /* ── Cards ── */
-    .card {
-      border: none !important; border-radius: 14px !important;
-      box-shadow: var(--shadow-soft); transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
-      background: rgba(255,255,255,0.85); backdrop-filter: blur(12px);
-      overflow: hidden;
+    /* ── CARDS ── */
+    .df-card {
+      background: var(--df-card); border-radius: 10px; border: 1px solid var(--df-border);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden;
     }
-    .card:hover { box-shadow: var(--shadow-hover); transform: translateY(-3px); }
-    .card-header {
-      background: transparent; border-bottom: 1px solid rgba(99,102,241,0.06);
-      font-weight: 700;
+    .df-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px; border-bottom: 1px solid var(--df-border);
     }
+    .df-card-title { font-size: 14px; font-weight: 600; color: var(--df-text); display: flex; align-items: center; gap: 8px; }
+    .df-card-body { padding: 18px; }
 
-    /* ── KPI Cards ── */
-    .kpi-card { position: relative; overflow: hidden; }
-    .kpi-card::before {
-      content: ''; position: absolute; top: -50%; right: -30%; width: 120px; height: 120px;
-      border-radius: 50%; opacity: 0.06; transition: all 0.4s;
+    /* ── KPI CARDS ── */
+    .df-kpi-label { font-size: 12px; color: var(--df-muted); font-weight: 500; margin-bottom: 4px; }
+    .df-kpi-value { font-size: 28px; font-weight: 600; color: var(--df-text); line-height: 1.2; }
+    .df-badge-critical { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; background: #FEE2E2; color: #DC2626; }
+    .df-badge-ok { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; background: #DCFCE7; color: #16A34A; }
+    .df-badge-good { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; background: #DCFCE7; color: #16A34A; }
+
+    /* ── TABLE ── */
+    .df-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .df-table thead th {
+      padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600;
+      text-transform: uppercase; color: var(--df-muted); background: #F8FAFC; letter-spacing: 0.03em;
+      border-bottom: 1px solid var(--df-border);
     }
-    .kpi-card:hover::before { opacity: 0.12; transform: scale(1.3); }
-    .kpi-card .h1, .kpi-card .h2 {
-      font-weight: 800; letter-spacing: -0.03em;
-      background: linear-gradient(135deg, #1e1b4b, #4338ca);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .kpi-card .subheader {
-      font-weight: 600; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.7;
-    }
-    .kpi-danger::before { background: var(--sunrise-danger); }
-    .kpi-warning::before { background: var(--sunrise-warning); }
-    .kpi-success::before { background: var(--sunrise-success); }
-    .kpi-primary::before { background: var(--sunrise-primary); }
+    .df-table tbody td { padding: 12px 14px; border-bottom: 1px solid var(--df-border); vertical-align: middle; }
+    .df-table tbody tr:nth-child(even) { background: #F8FAFC; }
+    .df-table tbody tr:hover { background: #F1F5F9; }
 
-    /* ── Animated Number Counter ── */
-    @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
-    .animate-in { animation: fadeUp 0.5s ease forwards; }
+    /* ── FLAG BADGES ── */
+    .df-flag { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .df-flag-stockout { background: #FFF7ED; color: #C2410C; }
+    .df-flag-dead { background: #FEFCE8; color: #A16207; }
+    .df-flag-perishable { background: #FFF1F2; color: #BE123C; }
+    .df-flag-critical { background: #FEE2E2; color: #DC2626; }
+    .df-flag-overstock { background: #FFF7ED; color: #C2410C; }
+    .df-flag-ok { background: #DCFCE7; color: #16A34A; }
+    .df-flag-shelf { background: #F0F9FF; color: #0369A1; }
 
-    /* ── Signal Tags ── */
-    .signal-tag {
-      display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 11px;
-      font-weight: 700; margin: 2px; letter-spacing: 0.02em;
-      transition: all 0.2s; cursor: default;
-    }
-    .signal-tag:hover { transform: scale(1.05); }
-    .signal-dropout { background: linear-gradient(135deg,#fee2e2,#fecaca); color: #991b1b; }
-    .signal-surge { background: linear-gradient(135deg,#fef3c7,#fde68a); color: #92400e; }
-    .signal-pattern { background: linear-gradient(135deg,#dbeafe,#bfdbfe); color: #1e40af; }
-    .signal-inventory { background: linear-gradient(135deg,#e0e7ff,#c7d2fe); color: #3730a3; }
-    .signal-promo { background: linear-gradient(135deg,#d1fae5,#a7f3d0); color: #065f46; }
-
-    /* ── Reason Text ── */
-    .reason-text {
-      font-size: 13px; line-height: 1.7; color: #475569; padding: 14px 18px;
-      background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-      border-radius: 10px; border-left: 4px solid var(--sunrise-primary);
-    }
-
-    /* ── Badges ── */
-    .badge { font-weight: 700; letter-spacing: 0.03em; border-radius: 6px; padding: 4px 10px; }
-    .bg-green { background: linear-gradient(135deg,#10b981,#059669) !important; }
-    .bg-yellow { background: linear-gradient(135deg,#f59e0b,#d97706) !important; }
-    .bg-red { background: linear-gradient(135deg,#ef4444,#dc2626) !important; }
-    .bg-blue { background: linear-gradient(135deg,#6366f1,#4f46e5) !important; }
-    .bg-orange { background: linear-gradient(135deg,#f97316,#ea580c) !important; }
-    .bg-purple { background: linear-gradient(135deg,#8b5cf6,#7c3aed) !important; }
-    .bg-danger { background: linear-gradient(135deg,#ef4444,#dc2626) !important; }
-    .bg-warning { background: linear-gradient(135deg,#f59e0b,#d97706) !important; color:#fff !important; }
-    .bg-cyan { background: linear-gradient(135deg,#06b6d4,#0891b2) !important; }
-
-    /* ── Tables ── */
-    .table thead th {
-      background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-      font-weight: 700; font-size: 11px; text-transform: uppercase;
-      letter-spacing: 0.06em; color: #64748b; border-bottom: 2px solid rgba(99,102,241,0.1);
-    }
-    .table tbody tr { transition: all 0.2s; }
-    .table tbody tr:hover { background: rgba(99,102,241,0.03); }
-
-    /* ── Buttons ── */
-    .btn-primary {
-      background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
-      border: none !important; box-shadow: 0 4px 12px rgba(99,102,241,0.3);
-      font-weight: 600; border-radius: 10px; transition: all 0.3s;
-    }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99,102,241,0.4); }
-    .btn-green {
-      background: linear-gradient(135deg,#10b981,#059669) !important;
-      border: none !important; box-shadow: 0 4px 12px rgba(16,185,129,0.3);
-    }
-    .btn-outline-primary { border-color: var(--sunrise-primary); color: var(--sunrise-primary); border-radius: 8px; font-weight: 600; }
-    .btn-outline-primary.active, .btn-outline-primary:hover {
-      background: linear-gradient(135deg,#6366f1,#8b5cf6) !important; color: #fff !important; border-color: transparent;
-    }
-
-    /* ── Hero Card ── */
-    .hero-card {
-      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 40%, #a78bfa 100%) !important;
-      color: #fff !important; border-radius: 16px !important;
-      box-shadow: 0 8px 32px rgba(99,102,241,0.3);
-    }
-    .hero-card h1, .hero-card .display-6 { color: #fff !important; -webkit-text-fill-color: #fff; font-weight: 800; }
-    .hero-card p { color: rgba(255,255,255,0.8) !important; }
-
-    /* ── Select Dropdowns ── */
-    .form-select { border-radius: 10px; border: 2px solid #e2e8f0; font-weight: 500; transition: all 0.3s; }
-    .form-select:focus { border-color: var(--sunrise-primary); box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
-
-    /* ── Alert ── */
-    .alert { border-radius: 12px; border: none; font-weight: 500; }
-    .alert-success { background: linear-gradient(135deg,#d1fae5,#a7f3d0); color: #065f46; }
-    .alert-danger { background: linear-gradient(135deg,#fee2e2,#fecaca); color: #991b1b; }
-
-    /* ── Scroll ── */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
-
-    /* ── Loading Pulse ── */
+    /* ── MISC ── */
+    .df-btn-outline { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 12px; font-weight: 500; color: var(--df-muted); background: #fff; cursor: pointer; text-decoration: none; }
+    .df-btn-outline:hover { background: #F8FAFC; border-color: #9CA3AF; }
+    .df-menu-dots { cursor: pointer; color: var(--df-muted); font-size: 18px; }
+    .loading-pulse { animation: pulse 1.5s ease-in-out infinite; color: #999; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-    .loading-pulse { animation: pulse 1.5s ease-in-out infinite; color: #94a3b8; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
 
-    /* ── Page Body ── */
-    .page-body { padding-top: 1.5rem; }
-    .page-wrapper { margin-top: 4px; }  /* offset for top strip */
+    /* ── AI MODE BANNER ── */
+    .df-ai-banner { display: flex; align-items: center; gap: 8px; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 10px 16px; margin-bottom: 16px; font-size: 13px; color: #92400E; }
 
-    /* ── Staggered card entrance ── */
-    .row-deck .col-sm-6:nth-child(1) .card { animation: fadeUp 0.4s ease forwards; }
-    .row-deck .col-sm-6:nth-child(2) .card { animation: fadeUp 0.5s ease forwards; }
-    .row-deck .col-sm-6:nth-child(3) .card { animation: fadeUp 0.6s ease forwards; }
-    .row-deck .col-sm-6:nth-child(4) .card { animation: fadeUp 0.7s ease forwards; }
-    .row-deck .col-lg-3:nth-child(1) .card { animation: fadeUp 0.4s ease forwards; }
-    .row-deck .col-lg-3:nth-child(2) .card { animation: fadeUp 0.5s ease forwards; }
-    .row-deck .col-lg-3:nth-child(3) .card { animation: fadeUp 0.6s ease forwards; }
-    .row-deck .col-lg-3:nth-child(4) .card { animation: fadeUp 0.7s ease forwards; }
+    /* ── RIGHT DETAIL PANEL ── */
+    .df-right-panel {
+      position: fixed; top: 56px; right: 0; bottom: 0; width: 300px; background: #fff;
+      border-left: 1px solid var(--df-border); box-shadow: -4px 0 16px rgba(0,0,0,0.06);
+      z-index: 98; transform: translateX(100%); transition: transform 0.25s ease; overflow-y: auto; padding: 0;
+    }
+    .df-right-panel.open { transform: translateX(0); }
+    .df-right-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--df-border); }
+    .df-right-panel-header h4 { margin: 0; font-size: 14px; font-weight: 600; }
+    .df-right-panel-close { background: none; border: none; cursor: pointer; color: var(--df-muted); font-size: 18px; }
+    .df-right-panel-body { padding: 18px; }
+    .df-main.panel-open { margin-right: 300px; transition: margin-right 0.25s ease; }
+
+    /* ── SELECTED ROW ── */
+    .df-table tbody tr.selected { background: #EFF6FF !important; border-left: 3px solid var(--df-blue); }
+    .df-table tbody tr { cursor: pointer; border-left: 3px solid transparent; }
+
+    /* ── PAGINATION ── */
+    .df-pagination { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-top: 1px solid var(--df-border); font-size: 12px; color: var(--df-muted); }
+    .df-pagination-btns { display: flex; gap: 4px; }
+    .df-pagination-btns button { padding: 5px 12px; border: 1px solid #D1D5DB; border-radius: 4px; background: #fff; font-size: 12px; color: var(--df-muted); cursor: pointer; }
+    .df-pagination-btns button:hover { background: #F1F5F9; }
+    .df-pagination-btns button.active { background: var(--df-blue); color: #fff; border-color: var(--df-blue); }
+
+    /* ── EDITABLE INPUT ── */
+    .df-editable { width: 64px; padding: 4px 8px; border: 1px solid #D1D5DB; border-radius: 4px; font-size: 13px; text-align: center; background: #FAFAFA; }
+    .df-editable:focus { border-color: var(--df-blue); outline: none; background: #fff; }
+
+    /* ── TABS ── */
+    .df-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--df-border); margin-bottom: 16px; }
+    .df-tab { padding: 10px 18px; font-size: 13px; font-weight: 500; color: var(--df-muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; text-decoration: none; }
+    .df-tab:hover { color: var(--df-text); }
+    .df-tab.active { color: var(--df-blue); border-bottom-color: var(--df-blue); font-weight: 600; }
+
+    /* ── TOOLBAR ── */
+    .df-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .df-sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+      .df-sidebar.open { transform: translateX(0); }
+      .df-topbar { left: 0; }
+      .df-main { margin-left: 0; }
+      .df-search input { width: 160px; }
+    }
   </style>
 </head>
-<body class="theme-light">
-  <!-- Animated gradient strips -->
-  <div class="gradient-strip-top"></div>
-  <div class="gradient-strip-bottom"></div>
-
-  <div class="page">
-    <!-- Sidebar -->
-    <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
-      <div class="container-fluid">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu"><span class="navbar-toggler-icon"></span></button>
-        <div class="navbar-brand navbar-brand-autodark py-3">
-          <span>Sunrise AI</span>
-        </div>
-        <div class="collapse navbar-collapse" id="sidebar-menu">
-          <ul class="navbar-nav pt-lg-3">
-            <li class="nav-item"><a class="nav-link {% if page=='overview' %}active{% endif %}" href="/"><span class="nav-link-icon"><i class="ti ti-dashboard"></i></span><span class="nav-link-title">Overview</span></a></li>
-            <li class="nav-item"><a class="nav-link {% if page=='retrospective' %}active{% endif %}" href="/retrospective"><span class="nav-link-icon"><i class="ti ti-search"></i></span><span class="nav-link-title">Diwali Retrospective</span></a></li>
-            <li class="nav-item"><a class="nav-link {% if page=='forecast' %}active{% endif %}" href="/forecast"><span class="nav-link-icon"><i class="ti ti-chart-line"></i></span><span class="nav-link-title">6-Week Forecast</span></a></li>
-            <li class="nav-item"><a class="nav-link {% if page=='reorder' %}active{% endif %}" href="/reorder"><span class="nav-link-icon"><i class="ti ti-shopping-cart"></i></span><span class="nav-link-title">Reorder Plan</span></a></li>
-            <li class="nav-item"><a class="nav-link {% if page=='classification' %}active{% endif %}" href="/classification"><span class="nav-link-icon"><i class="ti ti-tags"></i></span><span class="nav-link-title">SKU Classification</span></a></li>
-            <li class="nav-item"><a class="nav-link {% if page=='accuracy' %}active{% endif %}" href="/accuracy"><span class="nav-link-icon"><i class="ti ti-target"></i></span><span class="nav-link-title">Forecast Accuracy</span></a></li>
-          </ul>
-        </div>
+<body>
+  <!-- ── SIDEBAR ── -->
+  <nav class="df-sidebar">
+    <div class="df-brand">
+      <div class="df-brand-icon">
+        <svg viewBox="0 0 32 32" fill="none"><polygon points="16,2 30,28 2,28" fill="#3B82F6"/></svg>
       </div>
-    </aside>
-    <!-- Page wrapper -->
-    <div class="page-wrapper">
-      <div class="page-header d-print-none">
-        <div class="container-xl">
-          <div class="page-pretitle">Sunrise Consumer Goods -- Pune & Nashik</div>
-          <h2 class="page-title">{% block page_title %}Dashboard{% endblock %}</h2>
-        </div>
-      </div>
-      <div class="page-body">
-        <div class="container-xl">
-          {% block content %}{% endblock %}
-        </div>
-      </div>
+      <div class="df-brand-text">Delta<span>Forecast</span></div>
     </div>
-  </div>
+    <div class="df-nav">
+      <a class="df-nav-item {% if page=='overview' %}active{% endif %}" href="/"><i class="ti ti-layout-dashboard"></i>Dashboard</a>
+      <a class="df-nav-item {% if page=='sku_management' %}active{% endif %}" href="/sku-management"><i class="ti ti-package"></i>SKU Management</a>
+      <a class="df-nav-item {% if page=='reorder' %}active{% endif %}" href="/reorder"><i class="ti ti-shopping-cart"></i>Orders & Reorders</a>
+      <a class="df-nav-item {% if page=='outlets' or page=='purchase_orders' %}active{% endif %}" href="/outlets"><i class="ti ti-building-store"></i>Outlets</a>
+      <a class="df-nav-item {% if page=='retrospective' or page=='classification' or page=='data_quality' or page=='supplier' or page=='batch_expiry' %}active{% endif %}" href="/retrospective"><i class="ti ti-report-analytics"></i>Reports<span class="df-nav-dot"></span></a>
+      <a class="df-nav-item {% if page=='forecast' or page=='accuracy' %}active{% endif %}" href="/forecast"><i class="ti ti-brain"></i>AI Forecasting</a>
+      <a class="df-nav-item" href="/mobile/" target="_blank"><i class="ti ti-scan"></i>Barcode Scanner</a>
+    </div>
+    <div class="df-nav-bottom">
+      <a class="df-nav-item {% if page=='audit_trail' %}active{% endif %}" href="/audit-trail"><i class="ti ti-settings"></i>Settings</a>
+      <a class="df-nav-item" href="#"><i class="ti ti-help-circle"></i>Help & Support</a>
+    </div>
+  </nav>
+
+  <!-- ── TOP BAR ── -->
+  <header class="df-topbar">
+    <div class="df-search">
+      <i class="ti ti-search"></i>
+      <input type="text" placeholder="Search..." id="global-search">
+    </div>
+    <div class="df-topbar-right">
+      <div class="df-monday-pill"><span class="dot"></span>Monday Morning Report (Auto-Generated: 08:00 AM IST)</div>
+      <div class="df-topbar-icon"><i class="ti ti-upload"></i></div>
+      <div class="df-topbar-icon"><i class="ti ti-message-circle"></i></div>
+      <div class="df-topbar-icon"><i class="ti ti-bell"></i><span class="dot"></span></div>
+      {% if current_user.is_authenticated %}
+      <div class="df-user" data-bs-toggle="dropdown">
+        <div class="df-avatar">{{ current_user.initials }}</div>
+        <span class="df-user-name">{{ current_user.role|capitalize }}</span>
+        <i class="ti ti-chevron-down df-user-chevron"></i>
+      </div>
+      <div class="dropdown-menu dropdown-menu-end">
+        <a class="dropdown-item" href="/logout"><i class="ti ti-logout me-2"></i>Logout</a>
+      </div>
+      {% else %}
+      <div class="df-user">
+        <div class="df-avatar">A</div>
+        <span class="df-user-name">Admin</span>
+        <i class="ti ti-chevron-down df-user-chevron"></i>
+      </div>
+      {% endif %}
+    </div>
+  </header>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main class="df-main">
+    {% if ai_mode == 'local' %}
+    <div class="df-ai-banner">
+      <i class="ti ti-robot-off" style="font-size:18px"></i>
+      <span><strong>AI chatbot running in local fallback mode.</strong> Set <code>OPENROUTER_KEY</code> for full AI responses.</span>
+    </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
   <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.2.0/dist/js/tabler.min.js"></script>
-  <script>
-    function animateValue(el,start,end,dur){
-      if(!el)return;let st=null;const step=(ts)=>{if(!st)st=ts;const p=Math.min((ts-st)/dur,1);
-      const v=Math.floor(p*(end-start)+start);el.textContent=el.dataset.prefix+(v).toLocaleString('en-IN')+el.dataset.suffix;
-      if(p<1)window.requestAnimationFrame(step);};window.requestAnimationFrame(step);
-    }
-  </script>
   {% block scripts %}{% endblock %}
 
-  <!-- Chatbot Widget -->
+  <!-- ── CHATBOT WIDGET ── -->
   <style>
-    .chat-fab{position:fixed;bottom:28px;right:28px;z-index:9998;width:56px;height:56px;border-radius:50%;
-      background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;cursor:pointer;
-      box-shadow:0 6px 24px rgba(99,102,241,0.4);display:flex;align-items:center;justify-content:center;
-      transition:all 0.3s;font-size:24px;}
-    .chat-fab:hover{transform:scale(1.1);box-shadow:0 8px 32px rgba(99,102,241,0.5);}
-    .chat-fab .badge-dot{position:absolute;top:4px;right:4px;width:12px;height:12px;border-radius:50%;
-      background:#10b981;border:2px solid #fff;animation:pulse 2s infinite;}
-    .chat-window{position:fixed;bottom:96px;right:28px;z-index:9998;width:420px;max-height:560px;
-      border-radius:16px;overflow:hidden;display:none;flex-direction:column;
-      background:#fff;box-shadow:0 12px 48px rgba(0,0,0,0.15);
-      animation:fadeUp 0.3s ease;}
+    .chat-fab{position:fixed;bottom:24px;right:24px;z-index:9998;width:48px;height:48px;border-radius:50%;background:var(--df-blue);color:#fff;border:none;cursor:pointer;box-shadow:0 4px 12px rgba(59,130,246,0.3);display:flex;align-items:center;justify-content:center;font-size:22px;transition:all 0.2s;}
+    .chat-fab:hover{transform:scale(1.05);box-shadow:0 6px 16px rgba(59,130,246,0.4);}
+    .chat-window{position:fixed;bottom:84px;right:24px;z-index:9998;width:360px;max-height:480px;border-radius:12px;overflow:hidden;display:none;flex-direction:column;background:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.15);border:1px solid var(--df-border);}
     .chat-window.open{display:flex;}
-    .chat-header{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;padding:16px 20px;
-      display:flex;align-items:center;justify-content:space-between;}
-    .chat-header h4{margin:0;font-size:15px;font-weight:700;color:#fff;}
-    .chat-header p{margin:0;font-size:11px;color:rgba(255,255,255,0.7);}
-    .chat-header button{background:none;border:none;color:#fff;cursor:pointer;font-size:20px;opacity:0.7;}
+    .chat-header{background:var(--df-navy);color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;}
+    .chat-header h4{margin:0;font-size:14px;font-weight:600;color:#fff;}
+    .chat-header p{margin:0;font-size:10px;color:rgba(255,255,255,0.5);}
+    .chat-header button{background:none;border:none;color:#fff;cursor:pointer;font-size:18px;opacity:0.7;}
     .chat-header button:hover{opacity:1;}
-    .chat-messages{flex:1;overflow-y:auto;padding:16px;max-height:360px;min-height:200px;
-      background:#f8fafc;display:flex;flex-direction:column;gap:12px;}
-    .chat-msg{max-width:85%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6;
-      animation:fadeUp 0.3s ease;}
-    .chat-msg.user{align-self:flex-end;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;
-      border-bottom-right-radius:4px;}
-    .chat-msg.bot{align-self:flex-start;background:#fff;color:#334155;border:1px solid #e2e8f0;
-      border-bottom-left-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
-    .chat-msg.bot strong{color:#4338ca;}
-    .chat-msg.bot ul,.chat-msg.bot ol{margin:4px 0;padding-left:18px;}
-    .chat-msg.bot li{margin:2px 0;}
-    .chat-input-area{display:flex;padding:12px;border-top:1px solid #e2e8f0;background:#fff;gap:8px;}
-    .chat-input-area input{flex:1;border:2px solid #e2e8f0;border-radius:10px;padding:10px 14px;
-      font-size:13px;outline:none;transition:border 0.2s;font-family:'Inter',sans-serif;}
-    .chat-input-area input:focus{border-color:#6366f1;}
-    .chat-input-area button{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;
-      border-radius:10px;padding:10px 16px;cursor:pointer;font-weight:600;font-size:13px;
-      transition:all 0.2s;white-space:nowrap;}
-    .chat-input-area button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(99,102,241,0.3);}
-    .chat-input-area button:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
-    .chat-typing{display:flex;gap:4px;padding:8px 14px;align-self:flex-start;}
-    .chat-typing span{width:8px;height:8px;background:#94a3b8;border-radius:50%;animation:typing 1.4s infinite;}
+    .chat-messages{flex:1;overflow-y:auto;padding:14px;max-height:300px;min-height:160px;background:#F8FAFC;display:flex;flex-direction:column;gap:10px;}
+    .chat-msg{max-width:85%;padding:8px 12px;border-radius:8px;font-size:13px;line-height:1.5;}
+    .chat-msg.user{align-self:flex-end;background:var(--df-blue);color:#fff;border-bottom-right-radius:2px;}
+    .chat-msg.bot{align-self:flex-start;background:#fff;color:var(--df-text);border:1px solid var(--df-border);border-bottom-left-radius:2px;}
+    .chat-msg.bot strong{color:var(--df-blue);}
+    .chat-input-area{display:flex;padding:10px;border-top:1px solid var(--df-border);background:#fff;gap:8px;}
+    .chat-input-area input{flex:1;border:1px solid #D1D5DB;border-radius:6px;padding:8px 12px;font-size:13px;outline:none;}
+    .chat-input-area input:focus{border-color:var(--df-blue);}
+    .chat-input-area button{background:var(--df-blue);color:#fff;border:none;border-radius:6px;padding:8px 14px;cursor:pointer;font-weight:600;font-size:13px;}
+    .chat-typing{display:flex;gap:4px;padding:6px 12px;align-self:flex-start;}
+    .chat-typing span{width:6px;height:6px;background:#adb5bd;border-radius:50%;animation:typing 1.4s infinite;}
     .chat-typing span:nth-child(2){animation-delay:0.2s;}
     .chat-typing span:nth-child(3){animation-delay:0.4s;}
-    @keyframes typing{0%,60%,100%{transform:translateY(0);opacity:0.4}30%{transform:translateY(-6px);opacity:1}}
+    @keyframes typing{0%,60%,100%{transform:translateY(0);opacity:0.4}30%{transform:translateY(-4px);opacity:1}}
   </style>
-
-  <button class="chat-fab" onclick="toggleChat()" title="Ask the AI Assistant">
-    <i class="ti ti-message-chatbot" id="chat-icon"></i>
-    <span class="badge-dot"></span>
-  </button>
-
+  <button class="chat-fab" onclick="toggleChat()" title="Supply Chain Assistant"><i class="ti ti-message-chatbot" id="chat-icon"></i></button>
   <div class="chat-window" id="chat-window">
     <div class="chat-header">
-      <div><h4>Sunrise AI Assistant</h4><p>Ask anything about your inventory data</p></div>
-      <button onclick="toggleChat()">&times;</button>
+      <div><h4>Supply Chain Assistant</h4><p>(RAG Vector-Based)</p></div>
+      <button onclick="toggleChat()">×</button>
     </div>
     <div class="chat-messages" id="chat-messages">
-      <div class="chat-msg bot">Hi! I'm your Sunrise AI Assistant. I have access to all your pipeline data — forecasts, reorder plans, stockout analysis, and more. Ask me anything!<br><br>
-      Try: <em>"Give me a quick summary"</em> or <em>"Which SKUs need urgent reorder?"</em></div>
+      <div class="chat-msg bot">Ask about specific SKU or order reasoning...<br><br>Try: <em>"How line SKU?"</em> or <em>"Which SKUs need urgent reorder?"</em></div>
     </div>
     <div class="chat-input-area">
-      <input type="text" id="chat-input" placeholder="Ask about your data..." onkeydown="if(event.key==='Enter')sendChat()">
-      <button onclick="sendChat()" id="chat-send">Send</button>
+      <input type="text" id="chat-input" placeholder="Write a message..." onkeydown="if(event.key==='Enter')sendChat()">
+      <button onclick="sendChat()" id="chat-send"><i class="ti ti-send"></i></button>
     </div>
   </div>
-
   <script>
   let chatHistory=[];
-  function toggleChat(){
-    const w=document.getElementById('chat-window');
-    w.classList.toggle('open');
-    if(w.classList.contains('open'))document.getElementById('chat-input').focus();
-  }
-  function formatReply(text){
-    // Basic markdown: bold, bullets, newlines
-    return text
-      .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-      .replace(/^\* /gm,'<li>')
-      .replace(/^- /gm,'<li>')
-      .replace(/\n/g,'<br>')
-      .replace(/(<li>.*?)(<br>|$)/g,'<ul>$1</ul>');
-  }
-  async function sendChat(){
-    const input=document.getElementById('chat-input');
-    const msg=input.value.trim();
-    if(!msg)return;
-    input.value='';
-    const msgs=document.getElementById('chat-messages');
-    // User bubble
-    msgs.innerHTML+=`<div class="chat-msg user">${msg}</div>`;
-    // Typing indicator
-    msgs.innerHTML+=`<div class="chat-typing" id="typing"><span></span><span></span><span></span></div>`;
-    msgs.scrollTop=msgs.scrollHeight;
-    document.getElementById('chat-send').disabled=true;
-    chatHistory.push({role:'user',content:msg});
-    try{
-      const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({message:msg,history:chatHistory})});
-      const d=await r.json();
-      const reply=d.reply||'Sorry, something went wrong.';
-      chatHistory.push({role:'assistant',content:reply});
-      document.getElementById('typing')?.remove();
-      msgs.innerHTML+=`<div class="chat-msg bot">${formatReply(reply)}</div>`;
-    }catch(e){
-      document.getElementById('typing')?.remove();
-      msgs.innerHTML+=`<div class="chat-msg bot">Connection error. Please try again.</div>`;
-    }
-    document.getElementById('chat-send').disabled=false;
-    msgs.scrollTop=msgs.scrollHeight;
-  }
+  function toggleChat(){const w=document.getElementById('chat-window');w.classList.toggle('open');if(w.classList.contains('open'))document.getElementById('chat-input').focus();}
+  function formatReply(t){return t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/^- /gm,'• ').replace(/\n/g,'<br>');}
+  async function sendChat(){const input=document.getElementById('chat-input');const msg=input.value.trim();if(!msg)return;input.value='';const msgs=document.getElementById('chat-messages');msgs.innerHTML+=`<div class="chat-msg user">${msg}</div>`;msgs.innerHTML+=`<div class="chat-typing" id="typing"><span></span><span></span><span></span></div>`;msgs.scrollTop=msgs.scrollHeight;document.getElementById('chat-send').disabled=true;chatHistory.push({role:'user',content:msg});try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,history:chatHistory})});const d=await r.json();const reply=d.reply||'Sorry, something went wrong.';chatHistory.push({role:'assistant',content:reply});document.getElementById('typing')?.remove();msgs.innerHTML+=`<div class="chat-msg bot">${formatReply(reply)}</div>`;}catch(e){document.getElementById('typing')?.remove();msgs.innerHTML+=`<div class="chat-msg bot">Connection error. Please try again.</div>`;}document.getElementById('chat-send').disabled=false;msgs.scrollTop=msgs.scrollHeight;}
   </script>
 </body>
 </html>

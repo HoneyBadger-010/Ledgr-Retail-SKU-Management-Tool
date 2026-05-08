@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Supplier Performance{% endblock %}
+{% block page_title %}Supplier Lead Time Performance{% endblock %}
+{% block content %}
+<div class="row row-cards mb-3">
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="kpi-label">Avg Lead Time</div><div class="kpi-value" id="kpi-avg-lt">--</div><div class="text-muted small">days (all suppliers)</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="kpi-label">P80 Lead Time</div><div class="kpi-value text-warning" id="kpi-p80-lt">--</div><div class="text-muted small">80th percentile</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="kpi-label">Festive Season Avg</div><div class="kpi-value text-danger" id="kpi-festive-lt">--</div><div class="text-muted small">Oct-Nov (Diwali period)</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="kpi-label">Suppliers Tracked</div><div class="kpi-value" id="kpi-suppliers">--</div><div class="text-muted small">unique brands/suppliers</div></div></div></div>
+</div>
+
+<div class="row row-cards mb-3">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title"><i class="ti ti-chart-bar me-2"></i>Lead Time by Supplier</h3></div>
+      <div class="card-body"><div id="chart-lt-supplier" style="height:320px"><div class="loading-pulse text-center pt-5">Loading...</div></div></div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title"><i class="ti ti-sun me-2"></i>Festive vs Normal Lead Times</h3></div>
+      <div class="card-body"><div id="chart-festive-compare" style="height:320px"><div class="loading-pulse text-center pt-5">Loading...</div></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header"><h3 class="card-title"><i class="ti ti-report-analytics me-2"></i>Supplier Scorecard</h3></div>
+  <div class="table-responsive">
+    <table class="table table-vcenter table-hover card-table">
+      <thead><tr><th>Supplier / Brand</th><th>SKU Count</th><th>Avg Lead Time</th><th>Min Lead Time</th><th>Max Lead Time</th><th>Avg MOQ</th><th>Rating</th></tr></thead>
+      <tbody id="supplier-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header">
+    <h3 class="card-title"><i class="ti ti-package me-2"></i>SKU Lead Time Details</h3>
+    <div class="card-actions"><select class="form-select form-select-sm" id="supplier-filter" onchange="filterSupplierSKUs()" style="width:200px"><option value="">All Suppliers</option></select></div>
+  </div>
+  <div class="card-body"><div id="chart-sku-lt" style="height:300px"><div class="loading-pulse text-center pt-5">Loading...</div></div></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+let supplierData={};
+async function loadSupplierPerformance(){
+  const r=await fetch('/api/supplier-performance');const d=await r.json();supplierData=d;
+  document.getElementById('kpi-avg-lt').textContent=(d.avg_lead_time||0).toFixed(1);
+  document.getElementById('kpi-p80-lt').textContent=(d.p80_lead_time||0).toFixed(1);
+  document.getElementById('kpi-festive-lt').textContent=(d.festive_avg_lead_time||0).toFixed(1);
+  document.getElementById('kpi-suppliers').textContent=d.supplier_count||0;
+  const suppliers=d.suppliers||[];
+
+  document.getElementById('chart-lt-supplier').innerHTML='';
+  new ApexCharts(document.getElementById('chart-lt-supplier'),{chart:{type:'bar',height:300,toolbar:{show:false}},series:[{name:'Avg Lead Time',data:suppliers.map(s=>s.avg_lt)},{name:'Max Lead Time',data:suppliers.map(s=>s.max_lt)}],xaxis:{categories:suppliers.map(s=>s.name.substring(0,18)),labels:{style:{fontSize:'10px'},rotate:-45}},colors:['#206bc4','#d63939'],plotOptions:{bar:{borderRadius:4,columnWidth:'60%'}},grid:{borderColor:'#e6e7e9'},legend:{position:'top'}}).render();
+
+  document.getElementById('chart-festive-compare').innerHTML='';
+  new ApexCharts(document.getElementById('chart-festive-compare'),{chart:{type:'bar',height:300,toolbar:{show:false}},series:[{name:'Normal Period',data:suppliers.map(s=>s.avg_lt)},{name:'Festive (Est.)',data:suppliers.map(s=>Math.round(s.avg_lt*1.3*10)/10)}],xaxis:{categories:suppliers.map(s=>s.name.substring(0,12)),labels:{style:{fontSize:'10px'}}},colors:['#2fb344','#f76707'],plotOptions:{bar:{borderRadius:4,columnWidth:'55%'}},grid:{borderColor:'#e6e7e9'},legend:{position:'top'}}).render();
+
+  document.getElementById('supplier-tbody').innerHTML=suppliers.map(s=>{
+    const rating=s.avg_lt<=3?'<span class="badge bg-green">Excellent</span>':s.avg_lt<=5?'<span class="badge bg-blue">Good</span>':s.avg_lt<=7?'<span class="badge bg-yellow">Average</span>':'<span class="badge bg-red">Slow</span>';
+    return `<tr><td><strong>${s.name}</strong></td><td>${s.sku_count}</td><td>${s.avg_lt.toFixed(1)} days</td><td>${s.min_lt} days</td><td>${s.max_lt} days</td><td>${s.avg_moq}</td><td>${rating}</td></tr>`;
+  }).join('');
+
+  const sel=document.getElementById('supplier-filter');
+  sel.innerHTML='<option value="">All Suppliers</option>'+suppliers.map(s=>`<option value="${s.name}">${s.name}</option>`).join('');
+  filterSupplierSKUs();
+}
+function filterSupplierSKUs(){
+  const brand=document.getElementById('supplier-filter').value;
+  const skus=(supplierData.sku_details||[]).filter(s=>!brand||s.brand===brand);
+  document.getElementById('chart-sku-lt').innerHTML='';
+  new ApexCharts(document.getElementById('chart-sku-lt'),{chart:{type:'bar',height:280,toolbar:{show:false}},series:[{name:'Lead Time (days)',data:skus.slice(0,30).map(s=>s.lead_time)}],xaxis:{categories:skus.slice(0,30).map(s=>s.sku_id),labels:{style:{fontSize:'10px'},rotate:-45}},colors:['#206bc4'],plotOptions:{bar:{borderRadius:4,columnWidth:'50%'}},dataLabels:{enabled:true,style:{fontSize:'10px'}}}).render();
+}
+loadSupplierPerformance();
+</script>
+{% endblock %}

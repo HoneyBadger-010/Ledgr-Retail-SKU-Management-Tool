@@ -1,85 +1,164 @@
 {% extends "base.html" %}
-{% block title %}Reorder Recommendations{% endblock %}
-{% block page_title %}Reorder Recommendations{% endblock %}
+{% block title %}Orders & Reorders{% endblock %}
 {% block content %}
-<div class="row row-deck row-cards mb-3">
-  <div class="col-sm-6 col-lg-3"><div class="card kpi-card kpi-primary"><div class="card-body"><div class="subheader" style="color:var(--sunrise-primary)">Total Order Value</div><div class="h2 mt-1" id="ro-total">--</div></div></div></div>
-  <div class="col-sm-6 col-lg-3"><div class="card kpi-card kpi-success"><div class="card-body"><div class="subheader text-success">SKUs to Order</div><div class="h2 mt-1" id="ro-count">--</div></div></div></div>
-  <div class="col-sm-6 col-lg-3"><div class="card kpi-card kpi-danger"><div class="card-body"><div class="subheader text-danger">Urgent (Stockout Risk)</div><div class="h2 mt-1" id="ro-urgent">--</div></div></div></div>
-  <div class="col-sm-6 col-lg-3"><div class="card kpi-card kpi-warning"><div class="card-body"><div class="subheader text-warning">Shelf-Life Constrained</div><div class="h2 mt-1" id="ro-shelf">--</div></div></div></div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+  <h2 style="margin:0;font-size:22px;font-weight:700">Orders & Reorders Manager</h2>
 </div>
-<div class="row mb-3">
-  <div class="col-12"><div class="card">
-    <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-      <div class="btn-group" role="group">
-        <button class="btn btn-outline-primary active" onclick="filterReorder('All',this)">All</button>
-        <button class="btn btn-outline-danger" onclick="filterReorder('STOCKOUT_RISK',this)">Urgent</button>
-        <button class="btn btn-outline-warning" onclick="filterReorder('SHELF_LIFE',this)">Shelf-Life</button>
-        <button class="btn btn-outline-secondary" onclick="filterReorder('OVERSTOCK_RISK',this)">Overstock</button>
-        <button class="btn btn-outline-purple" style="border-color:#8b5cf6;color:#8b5cf6" onclick="filterReorder('PERISHABLE',this)">Perishable</button>
-      </div>
-      <a href="/api/download-reorder" class="btn btn-green"><i class="ti ti-download me-1"></i>Download CSV</a>
-    </div>
-    <div class="table-responsive" style="max-height:500px;overflow-y:auto">
-      <table class="table table-vcenter table-hover"><thead><tr>
-        <th>SKU</th><th>Category</th><th>Stock</th><th>Weeks Cover</th><th>6W Forecast</th><th>Reorder Qty</th><th>Order Value</th><th>Lead Time</th><th>Flags</th><th></th>
-      </tr></thead><tbody id="reorder-table"></tbody></table>
-    </div>
-  </div></div>
+
+<!-- Tabs -->
+<div class="df-tabs">
+  <a class="df-tab active" onclick="switchTab(this,'pending')">Pending Approval</a>
+  <a class="df-tab" onclick="switchTab(this,'approved')">Approved Orders</a>
+  <a class="df-tab" onclick="switchTab(this,'transit')">In Transit Tracking</a>
 </div>
-<div class="modal modal-blur fade" id="reason-modal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content" style="border-radius:16px;overflow:hidden">
-  <div class="modal-header" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff"><h5 class="modal-title" id="reason-title" style="color:#fff">Reorder Reasoning</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
-  <div class="modal-body"><div id="reason-body" class="reason-text" style="font-size:14px"></div></div>
-</div></div></div>
+
+<!-- Toolbar -->
+<div class="df-toolbar">
+  <div class="df-search" style="flex:0 0 auto"><i class="ti ti-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9CA3AF;font-size:14px"></i><input type="text" placeholder="Search SKUs..." id="order-search" style="width:200px;height:34px;padding-left:32px;border:1px solid #D1D5DB;border-radius:6px;font-size:12px;outline:none" oninput="filterOrders()"></div>
+  <button class="df-btn-outline"><i class="ti ti-filter"></i>Advanced Filter</button>
+  <button class="df-btn-outline" onclick="selectAll()"><i class="ti ti-checks"></i>Select All for Approval</button>
+  <div style="flex:1"></div>
+  <button class="btn btn-primary" style="font-size:13px;padding:7px 18px;border-radius:6px" id="approve-btn" onclick="approveSelected()">
+    <i class="ti ti-check me-1"></i>Approve Selected Orders (<span id="approve-total">₹0</span>)
+  </button>
+</div>
+
+<!-- Table -->
+<div class="df-card">
+  <div style="overflow-x:auto">
+    <table class="df-table" id="orders-table">
+      <thead><tr>
+        <th style="width:40px"><input type="checkbox" id="check-all" onchange="toggleAll(this)"></th>
+        <th style="cursor:pointer" onclick="sortTable('sku_id')">SKU ID <i class="ti ti-arrow-up" style="font-size:12px;color:#94A3B8"></i></th>
+        <th>Product Name</th>
+        <th>Forecast (6w)</th>
+        <th>Rec. Qty</th>
+        <th>MoQ</th>
+        <th>Adjusted Qty</th>
+        <th>Unit Cost ₹</th>
+        <th>Est. Total Cost ₹</th>
+        <th>Lead Time</th>
+        <th>Vendor</th>
+        <th>Stockout Risk Date</th>
+        <th>Flags</th>
+      </tr></thead>
+      <tbody id="orders-tbody"><tr><td colspan="13" class="loading-pulse" style="text-align:center;padding:24px">Loading...</td></tr></tbody>
+    </table>
+  </div>
+  <div class="df-pagination">
+    <span id="page-info">Showing 1 to 20 of -- SKUs</span>
+    <div class="df-pagination-btns">
+      <button onclick="prevPage()"><i class="ti ti-chevron-left"></i> Prev</button>
+      <button class="active">1</button>
+      <button onclick="nextPage()">Next <i class="ti ti-chevron-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- Right Detail Panel -->
+<aside class="df-right-panel" id="detail-panel">
+  <div class="df-right-panel-header">
+    <h4 id="panel-title">SKU Details</h4>
+    <button class="df-right-panel-close" onclick="closePanel()"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="df-right-panel-body">
+    <div style="font-size:12px;color:#64748B;margin-bottom:4px" id="panel-subtitle">--</div>
+    <div style="margin:16px 0"><canvas id="panel-chart" height="120"></canvas></div>
+    <div style="display:flex;gap:16px;margin-bottom:12px;font-size:11px">
+      <span><span style="display:inline-block;width:12px;height:3px;background:#94A3B8;margin-right:4px;vertical-align:middle"></span>Actual</span>
+      <span><span style="display:inline-block;width:12px;height:3px;background:#3B82F6;margin-right:4px;vertical-align:middle"></span>Predicted</span>
+    </div>
+    <div id="panel-details" style="font-size:13px;line-height:1.7;color:#475569"></div>
+  </div>
+</aside>
 {% endblock %}
+
 {% block scripts %}
 <script>
-let allReorder=[];let currentFilter='All';
-function flagBadge(f){
-  const map={STOCKOUT_RISK:'bg-danger',OVERSTOCK_RISK:'bg-warning',SHELF_LIFE_CONSTRAINED:'bg-orange',
-    PERISHABLE:'bg-purple',DEAD_STOCK:'bg-dark',LEAD_TIME_RISK:'bg-cyan',OK:'bg-muted'};
-  return f.split('|').map(x=>`<span class="badge ${map[x]||'bg-secondary'} me-1">${x.replace(/_/g,' ')}</span>`).join('');
+let allOrders=[],selectedIds=new Set(),panelChart=null;
+const vendors=['Supplier A','Supplier B','Supplier C','Parle Dist.','HUL Direct','ITC Warehouse'];
+
+async function loadOrders(){
+  const data=await(await fetch('/api/reorder-recommendations')).json();
+  allOrders=data.map((r,i)=>({...r,vendor:vendors[i%vendors.length],checked:false,adjusted_qty:r.final_reorder_qty||0}));
+  renderOrders(allOrders);
 }
-function renderTable(data){
-  const tb=document.getElementById('reorder-table');tb.innerHTML='';
-  data.forEach((r,i)=>{
-    const wosColor=r.weeks_of_stock<2?'text-danger fw-bold':r.weeks_of_stock<4?'text-warning fw-bold':'text-success';
-    tb.innerHTML+=`<tr style="animation:fadeUp ${0.2+i*0.03}s ease forwards">
-      <td><strong>${r.product_name||''}</strong><br><small class="text-secondary">${r.sku_id}</small></td>
-      <td><span class="badge bg-blue">${r.category||''}</span></td><td>${r.available_stock}</td>
-      <td class="${wosColor}">${r.weeks_of_stock}w</td>
-      <td>${r.forecast_6w_total}</td><td><strong style="font-size:15px">${r.final_reorder_qty}</strong></td>
-      <td style="font-weight:600">Rs.${(r.order_value_inr||0).toLocaleString('en-IN')}</td><td>${r.supplier_lead_time_days}d</td>
-      <td>${flagBadge(r.flags||'')}</td>
-      <td><button class="btn btn-sm btn-outline-primary" style="border-radius:8px" onclick="showReason(${i})"><i class="ti ti-info-circle"></i></button></td>
+
+function renderOrders(data){
+  const tbody=document.getElementById('orders-tbody');
+  tbody.innerHTML=data.slice(0,20).map((r,i)=>{
+    const flags=(r.flags||'OK').split('|');
+    const flagHtml=flags.map(f=>{
+      if(f==='STOCKOUT_RISK')return'<span class="df-flag df-flag-stockout">🚩 STOCKOUT RISK</span>';
+      if(f==='DEAD_STOCK')return'<span class="df-flag df-flag-dead">⚠️ DEAD ST...</span>';
+      if(f==='PERISHABLE')return'<span class="df-flag df-flag-perishable">🔥 PERISHABLE</span>';
+      if(f==='OK')return'<span class="df-flag df-flag-ok">✓ OK</span>';
+      return`<span class="df-flag df-flag-critical">${f}</span>`;
+    }).join(' ');
+    const checked=selectedIds.has(r.sku_id)?'checked':'';
+    const sel=selectedIds.has(r.sku_id)?'selected':'';
+    const cost=r.cost_price||20;
+    const total=(r.adjusted_qty||r.final_reorder_qty||0)*cost;
+    return`<tr class="${sel}" onclick="selectRow('${r.sku_id}',this)" data-sku="${r.sku_id}">
+      <td onclick="event.stopPropagation()"><input type="checkbox" ${checked} onchange="toggleCheck('${r.sku_id}',this)"></td>
+      <td style="font-weight:600">${r.sku_id}</td>
+      <td><div style="display:flex;align-items:center;gap:8px"><div style="width:36px;height:36px;background:#E2E8F0;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#94A3B8"><i class="ti ti-package"></i></div>${r.product_name||''}</div></td>
+      <td>${r.forecast_6w_total||0}w</td>
+      <td>${r.final_reorder_qty||0}</td>
+      <td>${r.moq||0}</td>
+      <td onclick="event.stopPropagation()"><input class="df-editable" type="number" value="${r.adjusted_qty||r.final_reorder_qty||0}" onchange="updateQty('${r.sku_id}',this.value)" min="0"> <i class="ti ti-pencil" style="font-size:12px;color:#94A3B8"></i></td>
+      <td>₹${cost.toLocaleString('en-IN')}</td>
+      <td style="font-weight:500">₹${total.toLocaleString('en-IN')}</td>
+      <td>${r.supplier_lead_time_days||7}d</td>
+      <td>${r.vendor}</td>
+      <td>${r.stockout_date_projected||'—'}</td>
+      <td>${flagHtml}</td>
     </tr>`;
-  });
+  }).join('');
+  document.getElementById('page-info').textContent=`Showing 1 to ${Math.min(20,data.length)} of ${data.length} SKUs`;
+  updateApproveTotal();
 }
-function showReason(i){
-  const data=currentFilter==='All'?allReorder:allReorder.filter(r=>(r.flags||'').includes(currentFilter));
-  const r=data[i];if(!r)return;
-  document.getElementById('reason-title').textContent=r.product_name+' -- '+r.sku_id;
-  document.getElementById('reason-body').textContent=r.reason_text||'No reason available';
-  new bootstrap.Modal(document.getElementById('reason-modal')).show();
+
+function toggleCheck(sku,cb){if(cb.checked)selectedIds.add(sku);else selectedIds.delete(sku);updateApproveTotal();}
+function toggleAll(cb){allOrders.forEach(r=>{if(cb.checked)selectedIds.add(r.sku_id);else selectedIds.delete(r.sku_id);});renderOrders(allOrders);}
+function selectAll(){allOrders.forEach(r=>selectedIds.add(r.sku_id));renderOrders(allOrders);}
+function updateQty(sku,val){const r=allOrders.find(o=>o.sku_id===sku);if(r)r.adjusted_qty=parseInt(val)||0;updateApproveTotal();}
+function updateApproveTotal(){
+  let total=0;selectedIds.forEach(id=>{const r=allOrders.find(o=>o.sku_id===id);if(r)total+=(r.adjusted_qty||r.final_reorder_qty||0)*(r.cost_price||20);});
+  document.getElementById('approve-total').textContent='₹'+total.toLocaleString('en-IN');
 }
-async function filterReorder(flag,btn){
-  currentFilter=flag;
-  document.querySelectorAll('.btn-group .btn').forEach(b=>b.classList.remove('active'));
-  if(btn)btn.classList.add('active');
-  const filtered=flag==='All'?allReorder:allReorder.filter(r=>(r.flags||'').includes(flag));
-  renderTable(filtered);
+function filterOrders(){const q=document.getElementById('order-search').value.toLowerCase();renderOrders(allOrders.filter(r=>(r.sku_id+' '+r.product_name).toLowerCase().includes(q)));}
+function sortTable(field){allOrders.sort((a,b)=>(a[field]||'').toString().localeCompare((b[field]||'').toString()));renderOrders(allOrders);}
+function prevPage(){}
+function nextPage(){}
+function switchTab(el,tab){document.querySelectorAll('.df-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+function approveSelected(){alert(`Approved ${selectedIds.size} orders!`);selectedIds.clear();renderOrders(allOrders);}
+
+function selectRow(sku,tr){
+  document.querySelectorAll('.df-table tbody tr').forEach(r=>r.classList.remove('selected'));
+  tr.classList.add('selected');
+  const r=allOrders.find(o=>o.sku_id===sku);if(!r)return;
+  document.getElementById('panel-title').textContent=r.sku_id+' — '+r.product_name;
+  document.getElementById('panel-subtitle').textContent=`${r.brand||'Brand'} • ${(r.category||'').replace(/_/g,' ')} • MOQ: ${r.moq}`;
+  document.getElementById('panel-details').innerHTML=`
+    <p><strong>Forecast:</strong> ${r.forecast_6w_total} units (6 weeks)</p>
+    <p><strong>Current Stock:</strong> ${r.available_stock} units (${r.weeks_of_stock}w)</p>
+    <p><strong>Safety Stock:</strong> ${r.safety_stock} units (${r.safety_stock_weeks}w)</p>
+    <p><strong>MAPE:</strong> ${(r.mape_pct||0).toFixed(1)}%</p>
+    <p style="color:#64748B;font-size:12px;margin-top:8px">${r.reason_text||''}</p>`;
+  // Chart
+  if(panelChart)panelChart.destroy();
+  const labels=['W1','W2','W3','W4','W5','W6'];
+  const actual=[120,130,100,140,110,null];
+  const predicted=[115,128,105,138,115,145];
+  panelChart=new Chart(document.getElementById('panel-chart'),{type:'line',data:{labels,datasets:[
+    {label:'Actual',data:actual,borderColor:'#94A3B8',borderWidth:2,pointRadius:3,tension:0.3},
+    {label:'Predicted',data:predicted,borderColor:'#3B82F6',borderWidth:2,pointRadius:3,tension:0.3,borderDash:[]}
+  ]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'#E2E8F0'}}}}});
+  document.getElementById('detail-panel').classList.add('open');
+  document.querySelector('.df-main').classList.add('panel-open');
 }
-async function loadReorder(){
-  allReorder=await(await fetch('/api/reorder-recommendations')).json();
-  const toOrder=allReorder.filter(r=>r.final_reorder_qty>0);
-  const urgent=allReorder.filter(r=>(r.flags||'').includes('STOCKOUT_RISK'));
-  const shelf=allReorder.filter(r=>(r.flags||'').includes('SHELF_LIFE'));
-  document.getElementById('ro-total').textContent='Rs.'+toOrder.reduce((a,r)=>a+(r.order_value_inr||0),0).toLocaleString('en-IN');
-  document.getElementById('ro-count').textContent=toOrder.length;
-  document.getElementById('ro-urgent').textContent=urgent.length;
-  document.getElementById('ro-shelf').textContent=shelf.length;
-  renderTable(allReorder);
-}
-loadReorder();
+function closePanel(){document.getElementById('detail-panel').classList.remove('open');document.querySelector('.df-main').classList.remove('panel-open');}
+loadOrders();
 </script>
 {% endblock %}

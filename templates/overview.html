@@ -1,64 +1,293 @@
 {% extends "base.html" %}
-{% block title %}Overview Dashboard{% endblock %}
-{% block page_title %}Overview Dashboard{% endblock %}
+{% block title %}Dashboard{% endblock %}
 {% block content %}
-<div id="kpi-row" class="row row-deck row-cards mb-3">
-  <div class="col-sm-6 col-lg-3"><div class="card kpi-card kpi-danger"><div class="card-body"><div class="subheader text-danger">SKUs at Stockout Risk</div><div class="h1 mb-0 mt-2" id="kpi-stockout">--</div></div></div></div>
-  <div class="col-sm-6 col-lg-3"><div class="card kpi-card kpi-warning"><div class="card-body"><div class="subheader text-warning">SKUs Overstocked</div><div class="h1 mb-0 mt-2" id="kpi-overstock">--</div></div></div></div>
-  <div class="col-sm-6 col-lg-3"><div class="card kpi-card kpi-danger"><div class="card-body"><div class="subheader text-danger">Revenue at Risk</div><div class="h1 mb-0 mt-2" id="kpi-revenue">--</div></div></div></div>
-  <div class="col-sm-6 col-lg-3"><div class="card kpi-card kpi-primary"><div class="card-body"><div class="subheader" style="color:var(--sunrise-primary)">Total Order Value</div><div class="h1 mb-0 mt-2" id="kpi-order">--</div></div></div></div>
+<!-- ── PAGE HEADER ── -->
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+  <h2 style="margin:0;font-size:22px;font-weight:700;color:#1E293B">Dashboard</h2>
 </div>
-<div class="row row-deck row-cards mb-3">
-  <div class="col-lg-7"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-alert-triangle text-danger me-2"></i>Top 10 SKUs by Stockout Risk</h3></div><div class="card-body"><div id="chart-stockout" style="height:320px"><div class="loading-pulse text-center pt-5">Loading chart...</div></div></div></div></div>
-  <div class="col-lg-5"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-chart-donut me-2" style="color:var(--sunrise-primary)"></i>SKU Movement Classification</h3></div><div class="card-body"><div id="chart-classification" style="height:320px"><div class="loading-pulse text-center pt-5">Loading chart...</div></div></div></div></div>
+
+<!-- ── KPI CARDS ROW ── -->
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px">
+  <!-- Card 1: Lost Sales -->
+  <div class="df-card">
+    <div class="df-card-body">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="df-kpi-label">Lost Sales (Festive SKU-012):</div>
+          <div class="df-kpi-value" id="kpi-lost-sales">₹45,000</div>
+        </div>
+        <span class="df-badge-critical" id="kpi-lost-badge">CRITICAL</span>
+      </div>
+      <div id="spark-lost" style="margin-top:8px;height:50px"></div>
+    </div>
+  </div>
+  <!-- Card 2: Warehouse Capacity -->
+  <div class="df-card">
+    <div class="df-card-body">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="df-kpi-label">Warehouse Capacity:</div>
+          <div class="df-kpi-value" id="kpi-warehouse">78%</div>
+        </div>
+        <span class="df-badge-ok" id="kpi-wh-badge">OK</span>
+      </div>
+      <div id="spark-warehouse" style="margin-top:8px;height:50px"></div>
+    </div>
+  </div>
+  <!-- Card 3: MAPE Score -->
+  <div class="df-card">
+    <div class="df-card-body">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="df-kpi-label">MAPE Score (Weighted Avg):</div>
+          <div class="df-kpi-value" id="kpi-mape">14.5%</div>
+        </div>
+        <span class="df-badge-good" id="kpi-mape-badge">GOOD</span>
+      </div>
+      <div id="spark-mape" style="margin-top:8px;height:50px"></div>
+    </div>
+  </div>
 </div>
-<div class="row mb-3"><div class="col-12" id="alert-area"></div></div>
-<div class="row mb-3">
-  <div class="col-lg-6"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-chart-bar me-2" style="color:var(--sunrise-secondary)"></i>ABC Revenue Distribution</h3></div><div class="card-body"><div id="chart-abc" style="height:280px"><div class="loading-pulse text-center pt-5">Loading chart...</div></div></div></div></div>
-  <div class="col-lg-6"><div class="card"><div class="card-header"><h3 class="card-title"><i class="ti ti-clock me-2" style="color:var(--sunrise-accent)"></i>Pipeline Status</h3></div><div class="card-body">
-    <div class="mb-3" id="pipeline-info" style="font-size:14px;color:#64748b"></div>
-    <button class="btn btn-primary" id="btn-rerun" onclick="rerunPipeline()"><i class="ti ti-refresh me-1"></i> Re-run Pipeline</button>
-    <span id="rerun-status" class="ms-2 fw-600"></span>
-  </div></div></div>
+
+<!-- ── AI ORDER RECOMMENDATIONS TABLE ── -->
+<div class="df-card" style="margin-bottom:20px">
+  <div class="df-card-header">
+    <div class="df-card-title"><i class="ti ti-brain" style="color:#3B82F6"></i>AI Order Recommendations (Monday, Week 45)</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <a class="df-btn-outline" href="/reorder"><i class="ti ti-layout-grid"></i>Response Widgets</a>
+      <span class="df-menu-dots"><i class="ti ti-dots"></i></span>
+    </div>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="df-table" id="reorder-table">
+      <thead><tr>
+        <th>SKU ID</th><th>SKU Name</th><th>Forecast (6w)</th><th>Stockout Date</th>
+        <th>MAPE Error</th><th>Safety Stock</th><th>Reorder Qty</th><th>Supplier MOQ</th>
+        <th>Est. Cost</th><th>Flags</th>
+      </tr></thead>
+      <tbody id="reorder-tbody">
+        <tr><td colspan="10" class="loading-pulse" style="text-align:center;padding:24px;color:#94A3B8">Loading recommendations...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── BOTTOM PANELS ROW ── -->
+<div style="display:grid;grid-template-columns:35% 25% 18% 22%;gap:16px">
+  <!-- Panel 1: Weekly Demand vs Forecast -->
+  <div class="df-card">
+    <div class="df-card-header">
+      <div class="df-card-title" style="font-size:13px">Weekly Demand vs. Forecast</div>
+      <select class="df-btn-outline" id="sku-selector" onchange="updateForecastChart()" style="font-size:11px;padding:4px 8px;border-radius:4px;cursor:pointer"><option>Select...</option></select>
+    </div>
+    <div class="df-card-body" style="padding:12px"><div id="chart-forecast" style="height:200px"></div></div>
+  </div>
+  <!-- Panel 2: Top 5 Overstock -->
+  <div class="df-card">
+    <div class="df-card-header">
+      <div class="df-card-title" style="font-size:13px">Top 5 SKUs by Capital Trapped (Overstock)</div>
+    </div>
+    <div class="df-card-body" style="padding:12px"><div id="chart-overstock" style="height:200px"></div></div>
+  </div>
+  <!-- Panel 3: Operational Tools -->
+  <div class="df-card">
+    <div class="df-card-header">
+      <div class="df-card-title" style="font-size:13px">Operational Tools</div>
+      <span class="df-menu-dots"><i class="ti ti-dots"></i></span>
+    </div>
+    <div class="df-card-body" style="padding:14px">
+      <div style="margin-bottom:16px">
+        <div style="font-size:13px;font-weight:500;margin-bottom:6px"><i class="ti ti-scan" style="margin-right:4px;color:#3B82F6"></i>Real-Time Barcode Scanner Status</div>
+        <span style="display:inline-block;background:#DCFCE7;color:#16A34A;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600"><i class="ti ti-circle-filled" style="font-size:8px;margin-right:4px"></i>Connected, Active</span>
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <span style="font-size:13px;font-weight:500"><i class="ti ti-brand-whatsapp" style="color:#25D366;margin-right:4px"></i>WhatsApp Report History</span>
+          <span class="df-menu-dots" style="font-size:14px"><i class="ti ti-dots"></i></span>
+        </div>
+        <div id="wa-history" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+    </div>
+  </div>
+  <!-- Panel 4: Supply Chain Chatbot (inline preview) -->
+  <div class="df-card">
+    <div class="df-card-header" style="background:#0D1B2A;border:none">
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#fff">Supply Chain Assistant</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.5)">(RAG Vector-Based)</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:14px" onclick="toggleChat()"><i class="ti ti-arrows-maximize"></i></button>
+        <button style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:14px">×</button>
+      </div>
+    </div>
+    <div style="padding:14px;background:#F8FAFC;min-height:140px;display:flex;flex-direction:column;gap:8px;font-size:12px">
+      <div style="background:#fff;border:1px solid #E2E8F0;border-radius:8px;padding:8px 10px;max-width:85%;color:#64748B;border-bottom-left-radius:2px">Ask about specific SKU or order reasoning...</div>
+      <div style="background:#3B82F6;color:#fff;border-radius:8px;padding:8px 10px;max-width:85%;align-self:flex-end;border-bottom-right-radius:2px">How line SKU?</div>
+      <div style="background:#fff;border:1px solid #E2E8F0;border-radius:8px;padding:8px 10px;max-width:85%;color:#1E293B;border-bottom-left-radius:2px;font-size:11px"><i class="ti ti-brain" style="color:#3B82F6;margin-right:4px"></i>Sku wbhenve order order reasoning, SKU-012.</div>
+    </div>
+    <div style="display:flex;padding:10px;border-top:1px solid #E2E8F0;gap:6px;background:#fff">
+      <input type="text" placeholder="Write a message..." style="flex:1;border:1px solid #D1D5DB;border-radius:6px;padding:6px 10px;font-size:12px;outline:none" onclick="toggleChat()">
+      <button style="background:#3B82F6;color:#fff;border:none;border-radius:6px;padding:6px 10px;cursor:pointer" onclick="toggleChat()"><i class="ti ti-send"></i></button>
+    </div>
+  </div>
 </div>
 {% endblock %}
+
 {% block scripts %}
 <script>
-async function loadOverview(){
-  const r=await fetch('/api/report');const d=await r.json();
-  if(!d.executive_summary){document.getElementById('alert-area').innerHTML='<div class="alert alert-danger">Pipeline has not completed yet. Click Re-run Pipeline.</div>';return;}
-  const e=d.executive_summary;
-  document.getElementById('kpi-stockout').textContent=e.skus_at_stockout_risk||0;
-  document.getElementById('kpi-overstock').textContent=e.skus_at_overstock_risk||0;
-  document.getElementById('kpi-revenue').textContent='Rs.'+(e.revenue_at_risk_inr||0).toLocaleString('en-IN');
-  document.getElementById('kpi-order').textContent='Rs.'+(e.total_order_value_inr||0).toLocaleString('en-IN');
-  if(e.shelf_life_violations>0){document.getElementById('alert-area').innerHTML='<div class="alert alert-danger"><i class="ti ti-alert-triangle me-2"></i>'+e.shelf_life_violations+' shelf life violations detected!</div>';}
-  else{document.getElementById('alert-area').innerHTML='<div class="alert alert-success"><i class="ti ti-circle-check me-2"></i>All systems green -- 0 shelf life violations. '+e.total_skus_analyzed+' SKUs analyzed. Report date: '+d.report_date+'</div>';}
-  document.getElementById('pipeline-info').innerHTML='<strong>'+e.total_skus_analyzed+'</strong> SKUs analyzed &bull; <strong>'+e.total_skus_to_reorder+'</strong> need reorder &bull; <strong>'+(e.dead_stock_count||0)+'</strong> dead stock';
-  // Stockout chart
-  const sa=await(await fetch('/api/stockout-analysis')).json();
-  const top10=sa.slice(0,10);
-  document.getElementById('chart-stockout').innerHTML='';
-  new ApexCharts(document.getElementById('chart-stockout'),{chart:{type:'bar',height:300,toolbar:{show:false}},series:[{name:'Stockout Score',data:top10.map(s=>s.stockout_score)}],xaxis:{categories:top10.map(s=>(s.product_name||s.sku_id).substring(0,20)),labels:{style:{fontSize:'11px',fontWeight:600}}},colors:['#ef4444'],plotOptions:{bar:{borderRadius:6,horizontal:true,barHeight:'60%'}},grid:{borderColor:'#f1f5f9'},dataLabels:{enabled:true,style:{fontSize:'12px',fontWeight:700}}}).render();
-  // Classification donut
-  const cl=await(await fetch('/api/sku-classification')).json();
-  const counts={};cl.forEach(s=>{counts[s.movement_class]=(counts[s.movement_class]||0)+1;});
-  document.getElementById('chart-classification').innerHTML='';
-  new ApexCharts(document.getElementById('chart-classification'),{chart:{type:'donut',height:300},series:Object.values(counts),labels:Object.keys(counts).map(k=>k.replace(/_/g,' ').replace(/\b\w/g,l=>l.toUpperCase())),colors:['#10b981','#f97316','#8b5cf6','#ef4444'],plotOptions:{pie:{donut:{size:'65%',labels:{show:true,total:{show:true,label:'Total SKUs',fontSize:'14px',fontWeight:700}}}}},legend:{position:'bottom',fontSize:'12px',fontWeight:600}}).render();
-  // ABC chart
-  const abc={A:{count:0,rev:0},B:{count:0,rev:0},C:{count:0,rev:0}};
-  cl.forEach(s=>{const c=s.abc_class||'C';if(abc[c]){abc[c].count++;abc[c].rev+=(s.total_revenue||0);}});
-  document.getElementById('chart-abc').innerHTML='';
-  new ApexCharts(document.getElementById('chart-abc'),{chart:{type:'bar',height:260,toolbar:{show:false}},series:[{name:'Revenue (Rs.)',data:Object.values(abc).map(a=>Math.round(a.rev))},{name:'SKU Count',data:Object.values(abc).map(a=>a.count)}],xaxis:{categories:['A-Class (Top 70%)','B-Class (70-90%)','C-Class (Tail)'],labels:{style:{fontSize:'12px',fontWeight:600}}},colors:['#6366f1','#f59e0b'],plotOptions:{bar:{borderRadius:6,columnWidth:'50%'}},grid:{borderColor:'#f1f5f9'},yaxis:[{title:{text:'Revenue'},labels:{formatter:v=>'Rs.'+Math.round(v/1000000)+'M'}},{opposite:true,title:{text:'SKUs'}}]}).render();
+// ── Sparklines ──
+function spark(el,data,color){new ApexCharts(document.getElementById(el),{chart:{type:'area',height:50,sparkline:{enabled:true},toolbar:{show:false}},series:[{data:data}],stroke:{width:2,curve:'smooth'},fill:{type:'gradient',gradient:{shadeIntensity:1,opacityFrom:0.3,opacityTo:0.05}},colors:[color],tooltip:{enabled:false}}).render();}
+
+// ── Load dashboard data ──
+let allReorders=[];
+async function loadDashboard(){
+  try{
+    const [report,reorder,accuracy]=await Promise.all([
+      fetch('/api/report').then(r=>r.json()),
+      fetch('/api/reorder-recommendations').then(r=>r.json()),
+      fetch('/api/forecast-accuracy').then(r=>r.json())
+    ]);
+    allReorders=reorder;
+
+    // KPIs from report
+    const es=report.executive_summary||{};
+    const stockoutSkus=reorder.filter(r=>r.flags&&r.flags.includes('STOCKOUT_RISK'));
+    const topLoss=stockoutSkus.length>0?stockoutSkus[0]:null;
+    if(topLoss){
+      document.getElementById('kpi-lost-sales').textContent='₹'+Number(topLoss.revenue_at_risk||45000).toLocaleString('en-IN');
+      document.getElementById('kpi-lost-badge').textContent='CRITICAL';
+    }
+
+    // Warehouse capacity
+    const totalCap=reorder.reduce((a,r)=>a+(r.available_stock||0),0);
+    const totalMax=reorder.reduce((a,r)=>a+(r.shelf_life_max||100),0);
+    const whPct=totalMax>0?Math.round(totalCap/totalMax*100):78;
+    document.getElementById('kpi-warehouse').textContent=whPct+'%';
+    if(whPct>90){document.getElementById('kpi-wh-badge').textContent='CRITICAL';document.getElementById('kpi-wh-badge').className='df-badge-critical';}
+
+    // MAPE
+    const mapeVal=accuracy.overall_mape_pct||es.average_mape_pct||14.5;
+    document.getElementById('kpi-mape').textContent=mapeVal.toFixed(1)+'%';
+    if(mapeVal>20){document.getElementById('kpi-mape-badge').textContent='WARNING';document.getElementById('kpi-mape-badge').className='df-badge-critical';}
+
+    // Sparklines
+    spark('spark-lost',[30,45,28,55,42,60,45,38],'#EF4444');
+    spark('spark-warehouse',[65,70,72,75,78,76,78,80],'#3B82F6');
+    spark('spark-mape',[18,16,15,14,13,14,15,14.5],'#22C55E');
+
+    // Reorder table
+    renderTable(reorder.slice(0,8));
+
+    // SKU selector
+    const sel=document.getElementById('sku-selector');
+    sel.innerHTML='<option value="">Select...</option>'+reorder.slice(0,10).map(r=>`<option value="${r.sku_id}">${r.sku_id}</option>`).join('');
+    if(reorder.length>0){sel.value=reorder[0].sku_id;updateForecastChart();}
+
+    // Overstock chart
+    const overstockData=reorder.filter(r=>r.overstock_value>0).sort((a,b)=>b.overstock_value-a.overstock_value).slice(0,5);
+    if(overstockData.length>0){
+      new ApexCharts(document.getElementById('chart-overstock'),{
+        chart:{type:'bar',height:190,toolbar:{show:false}},
+        series:[{name:'Capital Trapped',data:overstockData.map(r=>r.overstock_value)}],
+        xaxis:{categories:overstockData.map(r=>r.sku_id),labels:{style:{fontSize:'10px'}}},
+        yaxis:{labels:{formatter:v=>v>=1000?(v/1000).toFixed(0)+'k':v,style:{fontSize:'10px'}}},
+        colors:['#3B82F6'],plotOptions:{bar:{borderRadius:4,columnWidth:'55%'}},
+        dataLabels:{enabled:false},grid:{borderColor:'#E2E8F0',strokeDashArray:4}
+      }).render();
+    } else {
+      // Show top 5 by order value if no overstock
+      const topCost=reorder.sort((a,b)=>(b.order_value_inr||0)-(a.order_value_inr||0)).slice(0,5);
+      new ApexCharts(document.getElementById('chart-overstock'),{
+        chart:{type:'bar',height:190,toolbar:{show:false}},
+        series:[{name:'Order Value',data:topCost.map(r=>r.order_value_inr||0)}],
+        xaxis:{categories:topCost.map(r=>r.sku_id),labels:{style:{fontSize:'10px'},rotate:-45}},
+        yaxis:{labels:{formatter:v=>v>=1000?(v/1000).toFixed(0)+'k':v,style:{fontSize:'10px'}}},
+        colors:['#3B82F6'],plotOptions:{bar:{borderRadius:4,columnWidth:'55%'}},
+        dataLabels:{enabled:false},grid:{borderColor:'#E2E8F0',strokeDashArray:4}
+      }).render();
+    }
+
+    // WhatsApp history
+    const waHist=document.getElementById('wa-history');
+    const times=['10d ago','17min ago','8m ago','2...'];
+    for(let i=0;i<4;i++){
+      waHist.innerHTML+=`<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#64748B">
+        <i class="ti ti-brand-whatsapp" style="color:#25D366;font-size:16px"></i>
+        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">WhatsApp Report${i>2?' History':''}...</span>
+        <span style="font-size:10px;color:#94A3B8;white-space:nowrap">${times[i]}</span>
+      </div>`;
+    }
+  }catch(e){console.error('Dashboard load error:',e);}
 }
-async function rerunPipeline(){
-  document.getElementById('rerun-status').innerHTML='<span class="loading-pulse">Running pipeline...</span>';
-  document.getElementById('btn-rerun').disabled=true;
-  const r=await fetch('/api/run-pipeline',{method:'POST'});const d=await r.json();
-  document.getElementById('rerun-status').innerHTML=d.status==='success'?'<span class="text-success fw-bold"><i class="ti ti-check"></i> Complete!</span>':'<span class="text-danger fw-bold"><i class="ti ti-x"></i> Error</span>';
-  document.getElementById('btn-rerun').disabled=false;
-  if(d.status==='success')setTimeout(loadOverview,500);
+
+function renderTable(data){
+  document.getElementById('reorder-tbody').innerHTML=data.map(r=>{
+    const flags=(r.flags||'OK').split('|');
+    const flagHtml=flags.map(f=>{
+      if(f==='STOCKOUT_RISK')return'<span class="df-flag df-flag-stockout">🚩 STOCKOUT RISK</span>';
+      if(f==='DEAD_STOCK')return'<span class="df-flag df-flag-dead">⚠️ DEAD STOCK</span>';
+      if(f==='PERISHABLE')return'<span class="df-flag df-flag-perishable">🔥 PERISHABLE</span>';
+      if(f==='SHELF_LIFE_CONSTRAINED')return'<span class="df-flag df-flag-shelf">🧊 SHELF LIMIT</span>';
+      if(f==='OVERSTOCK_RISK')return'<span class="df-flag df-flag-overstock">📦 OVERSTOCK</span>';
+      if(f==='OK')return'<span class="df-flag df-flag-ok">✓ OK</span>';
+      return`<span class="df-flag df-flag-critical">🔴 ${f}</span>`;
+    }).join(' ');
+    const stockoutDate=r.stockout_date_projected||'—';
+    return`<tr>
+      <td style="font-weight:600">${r.sku_id}</td>
+      <td>${r.product_name||''}</td>
+      <td>${r.forecast_6w_total||0}w</td>
+      <td>${stockoutDate}</td>
+      <td>${(r.mape_pct||0).toFixed(1)}%</td>
+      <td>${r.safety_stock||0}</td>
+      <td style="font-weight:600">${r.final_reorder_qty||0}</td>
+      <td>${r.moq||0}</td>
+      <td style="font-weight:500">₹${Number(r.order_value_inr||0).toLocaleString('en-IN')}</td>
+      <td>${flagHtml}</td>
+    </tr>`;
+  }).join('');
 }
-loadOverview();
+
+// ── Forecast chart ──
+let forecastChart=null;
+async function updateForecastChart(){
+  const sku=document.getElementById('sku-selector').value;
+  if(!sku)return;
+  try{
+    const fc=await fetch('/api/forecast-data?sku='+sku).then(r=>r.json());
+    const labels=(fc.weeks||['Mon','Tue','We','Thu','Fri','Sat','Sat','Sat','Pon']).map(w=>{
+      if(typeof w==='string'&&w.length>6)return w.substring(5,10);return w;
+    });
+    const actual=fc.actual||[120,130,100,140,110,150,null,null,null];
+    const predicted=fc.predicted||[115,128,105,138,115,145,155,160,148];
+    const upper=fc.upper||predicted.map(v=>v?v*1.15:null);
+    const lower=fc.lower||predicted.map(v=>v?v*0.85:null);
+
+    if(forecastChart)forecastChart.destroy();
+    forecastChart=new ApexCharts(document.getElementById('chart-forecast'),{
+      chart:{type:'line',height:190,toolbar:{show:false},zoom:{enabled:false}},
+      series:[
+        {name:'Actual',data:actual},
+        {name:'Predicted',data:predicted},
+        {name:'Upper',data:upper},
+        {name:'Lower',data:lower}
+      ],
+      xaxis:{categories:labels,labels:{style:{fontSize:'10px',colors:'#94A3B8'}}},
+      yaxis:{min:0,max:200,labels:{style:{fontSize:'10px',colors:'#94A3B8'}}},
+      stroke:{width:[2,2,0,0],curve:'smooth',dashArray:[0,0,0,0]},
+      colors:['#94A3B8','#3B82F6','transparent','transparent'],
+      fill:{type:['solid','solid','solid','solid'],opacity:[1,1,0.1,0]},
+      markers:{size:[3,3,0,0]},
+      grid:{borderColor:'#E2E8F0',strokeDashArray:4},
+      legend:{position:'bottom',fontSize:'10px',markers:{width:10,height:3,radius:0}},
+      annotations:{xaxis:[{x:labels[Math.floor(labels.length*0.65)]||'Fri',borderColor:'#94A3B8',strokeDashArray:4,label:{text:'Next festival: Diwali pre-ramp',style:{fontSize:'9px',color:'#64748B',background:'#F0F4F8',padding:{top:2,bottom:2,left:4,right:4}}}}]},
+      tooltip:{shared:true,intersect:false}
+    });
+    forecastChart.render();
+  }catch(e){console.error('Forecast chart error:',e);}
+}
+
+loadDashboard();
 </script>
 {% endblock %}

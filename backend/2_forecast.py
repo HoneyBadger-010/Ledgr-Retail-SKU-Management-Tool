@@ -40,8 +40,9 @@ def run():
     sku_master = pd.read_csv(os.path.join(data_dir, "sku_master.csv"))
     outlet_master = pd.read_csv(os.path.join(data_dir, "outlet_master.csv"))
     
-    # Exclude missing_data rows, include true_zero, uncertain, stockout_gap, observed
-    sales_clean = sales[sales["row_classification"] != "missing_data"].copy()
+    # Exclude missing_data AND uncertain_excluded rows from training
+    # (Brief Part 4, Bug 2: uncertain_excluded rows are kept for audit but not passed to LightGBM)
+    sales_clean = sales[~sales["row_classification"].isin(["missing_data", "uncertain_excluded"])].copy()
     
     # Aggregate to SKU × week level (sum across outlets)
     sku_weekly = sales_clean.groupby(["sku_id", "week_start_date"]).agg(

@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}SKU Management{% endblock %}
+{% block page_title %}SKU Management{% endblock %}
+{% block content %}
+<!-- KPI Row -->
+<div class="row row-cards mb-3">
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="kpi-label">Total Active SKUs</div>
+        <div class="kpi-value" id="kpi-total">--</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="kpi-label">Fast Movers</div>
+        <div class="kpi-value text-success" id="kpi-fast">--</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="kpi-label">Slow Movers</div>
+        <div class="kpi-value text-warning" id="kpi-slow">--</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="kpi-label">Dead Stock</div>
+        <div class="kpi-value text-danger" id="kpi-dead">--</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mode Tabs -->
+<div class="card mb-3">
+  <div class="card-header">
+    <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs">
+      <li class="nav-item"><a href="#tab-all" class="nav-link active" data-bs-toggle="tab"><i class="ti ti-list me-1"></i>All SKUs</a></li>
+      <li class="nav-item"><a href="#tab-upload" class="nav-link" data-bs-toggle="tab"><i class="ti ti-upload me-1"></i>CSV Upload</a></li>
+      <li class="nav-item"><a href="#tab-add" class="nav-link" data-bs-toggle="tab"><i class="ti ti-plus me-1"></i>Add New SKU</a></li>
+    </ul>
+  </div>
+  <div class="card-body">
+    <div class="tab-content">
+      <!-- Tab: All SKUs -->
+      <div class="tab-pane show active" id="tab-all">
+        <div class="row mb-3 g-2">
+          <div class="col-md-4">
+            <div class="input-icon"><span class="input-icon-addon"><i class="ti ti-search"></i></span>
+            <input type="text" class="form-control" id="sku-search" placeholder="Search SKUs..." oninput="filterSKUs()"></div>
+          </div>
+          <div class="col-md-2"><select class="form-select" id="filter-category" onchange="filterSKUs()"><option value="">All Categories</option></select></div>
+          <div class="col-md-2"><select class="form-select" id="filter-brand" onchange="filterSKUs()"><option value="">All Brands</option></select></div>
+          <div class="col-md-2"><select class="form-select" id="filter-movement" onchange="filterSKUs()"><option value="">All Movements</option></select></div>
+          <div class="col-md-2 text-end">
+            <a href="/api/download-reorder" class="btn btn-outline-primary"><i class="ti ti-download me-1"></i>Export CSV</a>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-vcenter table-hover card-table">
+            <thead>
+              <tr><th>SKU Code</th><th>Product Name</th><th>Brand</th><th>Category</th><th>Unit Price</th><th>Cost Price</th><th>Shelf Life</th><th>MOQ</th><th>Lead Time</th><th>Movement</th><th>ABC</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="sku-tbody"></tbody>
+          </table>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <span class="text-muted" id="showing-text">Showing 0 SKUs</span>
+          <div id="pagination-btns"></div>
+        </div>
+      </div>
+      <!-- Tab: CSV Upload -->
+      <div class="tab-pane" id="tab-upload">
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <div class="card" style="border:2px dashed #dadfe5 !important">
+              <div class="card-body text-center py-5">
+                <i class="ti ti-file-upload" style="font-size:48px;color:#626976"></i>
+                <h3 class="mt-3">Upload SKU Data (CSV)</h3>
+                <p class="text-muted">Upload a CSV file with columns: sku_code, product_name, brand, category, unit_price, cost_price, shelf_life_days, moq_from_supplier, supplier_lead_time_days</p>
+                <input type="file" class="form-control mx-auto" style="max-width:400px" id="csv-file" accept=".csv">
+                <div class="mt-3" id="csv-preview" style="display:none">
+                  <h4>Preview (First 5 Rows)</h4>
+                  <div class="table-responsive" id="csv-preview-table"></div>
+                  <button class="btn btn-primary mt-2" onclick="submitCSV()"><i class="ti ti-check me-1"></i>Confirm Upload</button>
+                  <button class="btn btn-outline-secondary mt-2" onclick="cancelCSV()">Cancel</button>
+                </div>
+                <div id="csv-result" class="mt-3"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Tab: Add New SKU -->
+      <div class="tab-pane" id="tab-add">
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <div class="card">
+              <div class="card-header"><h3 class="card-title"><i class="ti ti-package me-2"></i>Add New SKU</h3></div>
+              <div class="card-body">
+                <form id="add-sku-form" onsubmit="addSKU(event)">
+                  <div class="row g-3">
+                    <div class="col-md-4"><label class="form-label required">SKU Code</label><input type="text" class="form-control" name="sku_code" required placeholder="e.g. SKU-141"></div>
+                    <div class="col-md-8"><label class="form-label required">Product Name</label><input type="text" class="form-control" name="product_name" required></div>
+                    <div class="col-md-4"><label class="form-label required">Brand</label><input type="text" class="form-control" name="brand" required></div>
+                    <div class="col-md-4"><label class="form-label required">Category</label>
+                      <select class="form-select" name="category" required><option value="personal_care">Personal Care</option><option value="household">Household</option><option value="packaged_food">Packaged Food</option></select>
+                    </div>
+                    <div class="col-md-4"><label class="form-label">Subcategory</label><input type="text" class="form-control" name="subcategory"></div>
+                    <div class="col-md-3"><label class="form-label required">Unit Price (₹)</label><input type="number" step="0.01" class="form-control" name="unit_price" required></div>
+                    <div class="col-md-3"><label class="form-label required">Cost Price (₹)</label><input type="number" step="0.01" class="form-control" name="cost_price" required></div>
+                    <div class="col-md-2"><label class="form-label required">Shelf Life (days)</label><input type="number" class="form-control" name="shelf_life_days" required min="1"></div>
+                    <div class="col-md-2"><label class="form-label required">MOQ</label><input type="number" class="form-control" name="moq_from_supplier" required min="1"></div>
+                    <div class="col-md-2"><label class="form-label required">Lead Time (days)</label><input type="number" class="form-control" name="supplier_lead_time_days" required min="1"></div>
+                  </div>
+                  <div class="mt-4"><button type="submit" class="btn btn-primary"><i class="ti ti-plus me-1"></i>Add SKU</button><button type="reset" class="btn btn-outline-secondary ms-2">Reset</button></div>
+                </form>
+                <div id="add-result" class="mt-3"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+let allSKUs=[],filteredSKUs=[],classifications={};
+const PAGE_SIZE=15;let currentPage=1;
+
+async function loadSKUs(){
+  const skuResp=await fetch('/api/sku-list-full');allSKUs=await skuResp.json();
+  try{const clsResp=await fetch('/api/sku-classification');const clsData=await clsResp.json();clsData.forEach(c=>{classifications[c.sku_id]=c;});}catch(e){}
+  const cats=[...new Set(allSKUs.map(s=>s.category))].sort();
+  const brands=[...new Set(allSKUs.map(s=>s.brand))].sort();
+  const movs=[...new Set(Object.values(classifications).map(c=>c.movement_class))].sort();
+  populateSelect('filter-category',cats);populateSelect('filter-brand',brands);populateSelect('filter-movement',movs);
+  document.getElementById('kpi-total').textContent=allSKUs.length;
+  document.getElementById('kpi-fast').textContent=Object.values(classifications).filter(c=>c.movement_class==='fast_mover').length;
+  document.getElementById('kpi-slow').textContent=Object.values(classifications).filter(c=>c.movement_class==='slow_mover').length;
+  document.getElementById('kpi-dead').textContent=Object.values(classifications).filter(c=>c.movement_class==='dead_stock').length;
+  filterSKUs();
+}
+function populateSelect(id,values){const sel=document.getElementById(id);const first=sel.options[0].textContent;sel.innerHTML=`<option value="">${first}</option>`+values.map(v=>`<option value="${v}">${v.replace(/_/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</option>`).join('');}
+function filterSKUs(){
+  const q=document.getElementById('sku-search').value.toLowerCase();const cat=document.getElementById('filter-category').value;const brand=document.getElementById('filter-brand').value;const mov=document.getElementById('filter-movement').value;
+  filteredSKUs=allSKUs.filter(s=>{if(q&&!s.sku_id.toLowerCase().includes(q)&&!(s.product_name||'').toLowerCase().includes(q)&&!(s.brand||'').toLowerCase().includes(q))return false;if(cat&&s.category!==cat)return false;if(brand&&s.brand!==brand)return false;if(mov){const cls=classifications[s.sku_id];if(!cls||cls.movement_class!==mov)return false;}return true;});
+  currentPage=1;renderTable();
+}
+function renderTable(){
+  const start=(currentPage-1)*PAGE_SIZE;const pageData=filteredSKUs.slice(start,start+PAGE_SIZE);
+  document.getElementById('sku-tbody').innerHTML=pageData.map(s=>{
+    const cls=classifications[s.sku_id]||{};
+    const movBadge=getMovBadge(cls.movement_class);const abcBadge=getABCBadge(cls.abc_class);
+    return `<tr><td><strong>${s.sku_id}</strong></td><td>${s.product_name||''}</td><td>${s.brand||''}</td><td>${(s.category||'').replace(/_/g,' ')}</td><td>₹${(s.unit_price||0).toFixed(2)}</td><td>₹${(s.cost_price||0).toFixed(2)}</td><td>${s.shelf_life_days||'--'} days</td><td>${s.moq_from_supplier||'--'}</td><td>${s.supplier_lead_time_days||'--'} days</td><td>${movBadge}</td><td>${abcBadge}</td><td><button class="btn btn-sm btn-outline-primary me-1" onclick="editSKU('${s.sku_id}')"><i class="ti ti-edit"></i></button><button class="btn btn-sm btn-outline-danger" onclick="deleteSKU('${s.sku_id}')"><i class="ti ti-trash"></i></button></td></tr>`;
+  }).join('');
+  document.getElementById('showing-text').textContent=`Showing ${start+1}–${Math.min(start+PAGE_SIZE,filteredSKUs.length)} of ${filteredSKUs.length} SKUs`;
+  renderPagination();
+}
+function getMovBadge(m){const map={fast_mover:'bg-green',slow_mover:'bg-yellow',seasonal:'bg-purple',dead_stock:'bg-red'};return m?`<span class="badge ${map[m]||'bg-secondary'}">${m.replace(/_/g,' ').toUpperCase()}</span>`:'<span class="badge bg-secondary">N/A</span>';}
+function getABCBadge(a){const map={A:'bg-green',B:'bg-yellow',C:'bg-orange'};return a?`<span class="badge ${map[a]||'bg-secondary'}">${a}</span>`:'';}
+function renderPagination(){const tp=Math.ceil(filteredSKUs.length/PAGE_SIZE);if(tp<=1){document.getElementById('pagination-btns').innerHTML='';return;}let h='<div class="btn-group">';for(let i=1;i<=tp;i++){h+=`<button class="btn btn-sm ${i===currentPage?'btn-primary':'btn-outline-secondary'}" onclick="goPage(${i})">${i}</button>`;}h+='</div>';document.getElementById('pagination-btns').innerHTML=h;}
+function goPage(p){currentPage=p;renderTable();}
+document.getElementById('csv-file')?.addEventListener('change',function(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(evt){const lines=evt.target.result.split('\n').filter(l=>l.trim());if(lines.length<2){alert('CSV must have headers and at least 1 data row');return;}const headers=lines[0].split(',').map(h=>h.trim());const rows=lines.slice(1,6).map(l=>l.split(',').map(c=>c.trim()));let table='<table class="table table-sm"><thead><tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>';rows.forEach(r=>{table+='<tr>'+r.map(c=>`<td>${c}</td>`).join('')+'</tr>';});table+='</tbody></table>';document.getElementById('csv-preview-table').innerHTML=table;document.getElementById('csv-preview').style.display='block';document.getElementById('csv-result').innerHTML=`<span class="text-muted">${lines.length-1} rows detected</span>`;};reader.readAsText(file);});
+function cancelCSV(){document.getElementById('csv-preview').style.display='none';document.getElementById('csv-file').value='';}
+async function submitCSV(){const file=document.getElementById('csv-file').files[0];if(!file)return;const form=new FormData();form.append('file',file);try{const r=await fetch('/api/sku/upload',{method:'POST',body:form});const d=await r.json();document.getElementById('csv-result').innerHTML=d.status==='success'?`<div class="alert alert-success">${d.message}</div>`:`<div class="alert alert-danger">${d.message||'Upload failed'}</div>`;if(d.status==='success'){cancelCSV();loadSKUs();}}catch(e){document.getElementById('csv-result').innerHTML='<div class="alert alert-danger">Upload failed</div>';}}
+async function addSKU(e){e.preventDefault();const data=Object.fromEntries(new FormData(e.target));try{const r=await fetch('/api/sku/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});const d=await r.json();document.getElementById('add-result').innerHTML=d.status==='success'?`<div class="alert alert-success">${d.message}</div>`:`<div class="alert alert-danger">${d.message||'Failed'}</div>`;if(d.status==='success'){e.target.reset();loadSKUs();}}catch(e){document.getElementById('add-result').innerHTML='<div class="alert alert-danger">Failed to add SKU</div>';}}
+function editSKU(skuId){alert('Edit modal for '+skuId+' — coming soon');}
+async function deleteSKU(skuId){if(!confirm(`Delete ${skuId}?`))return;try{const r=await fetch('/api/sku/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sku_id:skuId})});const d=await r.json();alert(d.message||'Done');loadSKUs();}catch(e){alert('Delete failed');}}
+loadSKUs();
+</script>
+{% endblock %}

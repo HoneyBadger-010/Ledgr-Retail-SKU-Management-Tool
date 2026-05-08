@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+  <title>Sunrise Scanner</title>
+  <meta name="theme-color" content="#1a1c2e"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <link rel="manifest" href="/mobile/manifest.json"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;background:#0f1117;color:#fff;min-height:100vh;display:flex;flex-direction:column}
+    .header{background:#1a1c2e;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.1)}
+    .header .brand{color:#4ade80;font-weight:700;font-size:18px}
+    .header .status{font-size:11px;padding:4px 10px;border-radius:12px;font-weight:600}
+    .status-online{background:#2fb344;color:#fff}
+    .status-offline{background:#d63939;color:#fff}
+    .scanner-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;position:relative}
+    #video-container{width:100%;max-width:400px;aspect-ratio:4/3;background:#000;border-radius:12px;overflow:hidden;position:relative;border:2px solid rgba(255,255,255,0.1)}
+    #video-container video{width:100%;height:100%;object-fit:cover}
+    .scan-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60%;height:40%;border:2px solid #4ade80;border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,0.4)}
+    .scan-line{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#4ade80,transparent);animation:scanLine 2s linear infinite}
+    @keyframes scanLine{0%{top:0}100%{top:100%}}
+    .scan-prompt{text-align:center;margin-top:16px;color:rgba(255,255,255,0.6);font-size:13px}
+    .scan-result{background:#1a1c2e;border-radius:12px;padding:16px;margin-top:16px;width:100%;max-width:400px;display:none;border:1px solid rgba(255,255,255,0.1)}
+    .scan-result.show{display:block;animation:fadeIn 0.3s ease}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .scan-result .barcode-value{font-size:20px;font-weight:700;color:#4ade80;margin-bottom:12px}
+    .form-group{margin-bottom:12px}
+    .form-group label{font-size:12px;color:rgba(255,255,255,0.5);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:4px}
+    .form-group input,.form-group select{width:100%;padding:10px 12px;background:#0f1117;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:14px;outline:none}
+    .form-group input:focus{border-color:#4ade80}
+    .btn-submit{width:100%;padding:12px;background:#206bc4;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+    .btn-submit:hover{background:#1a5dab}
+    .btn-submit:disabled{opacity:0.5;cursor:not-allowed}
+    .queue-bar{background:#1a1c2e;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,0.1)}
+    .queue-count{font-size:13px;color:rgba(255,255,255,0.6)}
+    .queue-count strong{color:#f59f00}
+    .btn-sync{padding:8px 16px;background:#2fb344;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer}
+    .btn-sync:disabled{opacity:0.5}
+    .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:999;display:none}
+    .toast.success{background:#2fb344;color:#fff;display:block;animation:fadeIn 0.3s}
+    .toast.error{background:#d63939;color:#fff;display:block;animation:fadeIn 0.3s}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="brand">☀ Sunrise Scanner</span>
+    <span class="status" id="net-status">●</span>
+  </div>
+
+  <div class="scanner-area">
+    <div id="video-container">
+      <video id="video" autoplay playsinline></video>
+      <div class="scan-overlay"><div class="scan-line"></div></div>
+    </div>
+    <div class="scan-prompt" id="scan-prompt">Point camera at barcode to scan</div>
+
+    <div class="scan-result" id="scan-result">
+      <div class="barcode-value" id="barcode-value">--</div>
+      <div class="form-group"><label>SKU Code</label><input id="f-sku" placeholder="Auto-filled from barcode"/></div>
+      <div class="form-group"><label>Product Name</label><input id="f-name" placeholder="Enter product name"/></div>
+      <div class="form-group"><label>Quantity Received</label><input id="f-qty" type="number" min="1" value="1"/></div>
+      <div class="form-group"><label>Batch Expiry Date</label><input id="f-expiry" type="date"/></div>
+      <button class="btn-submit" id="btn-submit" onclick="submitScan()">✓ Confirm & Save</button>
+    </div>
+  </div>
+
+  <div class="queue-bar">
+    <span class="queue-count">Queued: <strong id="queue-count">0</strong> scans</span>
+    <button class="btn-sync" id="btn-sync" onclick="syncQueue()">↑ Sync Now</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ── IndexedDB for offline queue ──
+    const DB_NAME='sunrise_scanner',STORE='scan_queue';
+    function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,1);r.onupgradeneeded=e=>{e.target.result.createObjectStore(STORE,{keyPath:'id',autoIncrement:true})};r.onsuccess=e=>res(e.target.result);r.onerror=e=>rej(e)})}
+    async function addToQueue(data){const db=await openDB();return new Promise((res,rej)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).add({...data,timestamp:Date.now()});tx.oncomplete=()=>res();tx.onerror=e=>rej(e)})}
+    async function getQueue(){const db=await openDB();return new Promise((res,rej)=>{const tx=db.transaction(STORE,'readonly');const req=tx.objectStore(STORE).getAll();req.onsuccess=()=>res(req.result);req.onerror=e=>rej(e)})}
+    async function clearQueue(){const db=await openDB();return new Promise((res,rej)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).clear();tx.oncomplete=()=>res();tx.onerror=e=>rej(e)})}
+
+    // ── Network status ──
+    function updateNetStatus(){
+      const el=document.getElementById('net-status');
+      if(navigator.onLine){el.textContent='● Online';el.className='status status-online'}
+      else{el.textContent='● Offline';el.className='status status-offline'}
+    }
+    window.addEventListener('online',()=>{updateNetStatus();syncQueue()});
+    window.addEventListener('offline',updateNetStatus);
+    updateNetStatus();
+
+    // ── Update queue count ──
+    async function updateQueueCount(){
+      const q=await getQueue();
+      document.getElementById('queue-count').textContent=q.length;
+    }
+    updateQueueCount();
+
+    // ── Barcode scanning ──
+    let lastScan='',scanning=true;
+    async function startCamera(){
+      try{
+        const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}});
+        document.getElementById('video').srcObject=stream;
+        if('BarcodeDetector' in window){
+          const detector=new BarcodeDetector({formats:['ean_13','ean_8','code_128','code_39','qr_code','upc_a','upc_e']});
+          setInterval(async()=>{
+            if(!scanning)return;
+            try{const barcodes=await detector.detect(document.getElementById('video'));
+            if(barcodes.length>0&&barcodes[0].rawValue!==lastScan){handleScan(barcodes[0].rawValue)}}catch(e){}
+          },500);
+        }else{document.getElementById('scan-prompt').textContent='BarcodeDetector not supported. Enter SKU manually below.';showManualEntry()}
+      }catch(e){document.getElementById('scan-prompt').textContent='Camera access denied. Enter SKU manually.';showManualEntry()}
+    }
+
+    function showManualEntry(){
+      document.getElementById('scan-result').classList.add('show');
+      document.getElementById('barcode-value').textContent='Manual Entry';
+      document.getElementById('f-sku').focus();
+    }
+
+    function handleScan(value){
+      lastScan=value;scanning=false;
+      document.getElementById('scan-result').classList.add('show');
+      document.getElementById('barcode-value').textContent=value;
+      document.getElementById('f-sku').value=value;
+      document.getElementById('scan-prompt').textContent='Barcode detected! Confirm details below.';
+      navigator.vibrate&&navigator.vibrate(100);
+      // Auto-resume scanning after 10 seconds
+      setTimeout(()=>{scanning=true},10000);
+    }
+
+    // ── Submit scan ──
+    async function submitScan(){
+      const data={
+        sku_code:document.getElementById('f-sku').value.trim(),
+        product_name:document.getElementById('f-name').value.trim(),
+        qty_received:parseInt(document.getElementById('f-qty').value)||1,
+        batch_expiry:document.getElementById('f-expiry').value,
+        scanned_at:new Date().toISOString()
+      };
+      if(!data.sku_code){showToast('SKU code is required','error');return}
+
+      document.getElementById('btn-submit').disabled=true;
+
+      if(navigator.onLine){
+        try{
+          const token=localStorage.getItem('auth_token')||'';
+          const r=await fetch('/api/sku/scan',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify(data)});
+          const d=await r.json();
+          if(d.status==='success'){showToast('Saved successfully!','success')}
+          else{await addToQueue(data);showToast('Queued for sync','success')}
+        }catch(e){await addToQueue(data);showToast('Offline — queued','success')}
+      }else{
+        await addToQueue(data);
+        showToast('Offline — queued for sync','success');
+      }
+
+      await updateQueueCount();
+      document.getElementById('btn-submit').disabled=false;
+      // Reset form
+      document.getElementById('f-sku').value='';document.getElementById('f-name').value='';
+      document.getElementById('f-qty').value='1';document.getElementById('f-expiry').value='';
+      document.getElementById('scan-result').classList.remove('show');
+      document.getElementById('scan-prompt').textContent='Point camera at barcode to scan';
+      scanning=true;lastScan='';
+    }
+
+    // ── Sync offline queue ──
+    async function syncQueue(){
+      if(!navigator.onLine){showToast('No internet connection','error');return}
+      const q=await getQueue();
+      if(q.length===0){showToast('Nothing to sync','success');return}
+      document.getElementById('btn-sync').disabled=true;
+      let ok=0,fail=0;
+      const token=localStorage.getItem('auth_token')||'';
+      for(const item of q){
+        try{
+          const r=await fetch('/api/sku/scan',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify(item)});
+          const d=await r.json();if(d.status==='success')ok++;else fail++;
+        }catch(e){fail++}
+      }
+      if(fail===0){await clearQueue();showToast(`Synced ${ok} scans!`,'success')}
+      else{showToast(`${ok} synced, ${fail} failed`,'error')}
+      await updateQueueCount();
+      document.getElementById('btn-sync').disabled=false;
+    }
+
+    function showToast(msg,type){
+      const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+type;
+      setTimeout(()=>{t.className='toast'},3000);
+    }
+
+    startCamera();
+  </script>
+</body>
+</html>

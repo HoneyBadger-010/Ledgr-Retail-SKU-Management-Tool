@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Inventory Audit Trail{% endblock %}
+{% block page_title %}Inventory Audit Trail{% endblock %}
+{% block content %}
+<div class="card mb-3">
+  <div class="card-header">
+    <h3 class="card-title"><i class="ti ti-history me-2"></i>Stock Adjustment Log</h3>
+    <div class="card-actions">
+      <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#adj-modal"><i class="ti ti-plus me-1"></i>Log Adjustment</button>
+    </div>
+  </div>
+  <div class="table-responsive" style="max-height:600px;overflow-y:auto">
+    <table class="table table-vcenter table-hover card-table table-striped">
+      <thead><tr>
+        <th>Timestamp</th><th>User</th><th>SKU</th><th>Field</th>
+        <th>Old Value</th><th>New Value</th><th>Change</th><th>Reason</th>
+      </tr></thead>
+      <tbody id="audit-tbody">
+        <tr><td colspan="8" class="text-center text-muted py-4">Loading audit trail...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Adjustment Modal -->
+<div class="modal fade" id="adj-modal" tabindex="-1">
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title"><i class="ti ti-edit me-2"></i>Log Stock Adjustment</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body">
+      <div class="mb-3"><label class="form-label">SKU ID</label>
+        <select class="form-select" id="adj-sku"><option value="">Select SKU...</option></select></div>
+      <div class="mb-3"><label class="form-label">Field</label>
+        <select class="form-select" id="adj-field">
+          <option value="warehouse_stock">Warehouse Stock</option>
+          <option value="in_transit_qty">In-Transit Qty</option>
+          <option value="committed_qty">Committed Qty</option>
+        </select></div>
+      <div class="row">
+        <div class="col-6 mb-3"><label class="form-label">Old Value</label><input type="number" class="form-control" id="adj-old" min="0"></div>
+        <div class="col-6 mb-3"><label class="form-label">New Value</label><input type="number" class="form-control" id="adj-new" min="0"></div>
+      </div>
+      <div class="mb-3"><label class="form-label">Reason</label><textarea class="form-control" id="adj-reason" rows="2" placeholder="Reason for adjustment..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAdj()"><i class="ti ti-check me-1"></i>Save</button>
+    </div>
+  </div></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function loadAudit(){
+  const skus=await(await fetch('/api/sku-list')).json();
+  document.getElementById('adj-sku').innerHTML='<option value="">Select SKU...</option>'+skus.map(s=>`<option value="${s.sku_id}">${s.sku_id} - ${s.product_name}</option>`).join('');
+  const data=await(await fetch('/api/audit-trail')).json();
+  if(!data.length){document.getElementById('audit-tbody').innerHTML='<tr><td colspan="8" class="text-center text-muted py-4"><i class="ti ti-clipboard-list" style="font-size:32px"></i><p class="mt-2">No adjustments logged yet.</p></td></tr>';return;}
+  document.getElementById('audit-tbody').innerHTML=data.reverse().map(e=>{
+    const diff=e.new_value-e.old_value;
+    const diffClass=diff>0?'text-success':'text-danger';
+    const diffText=diff>0?`+${diff}`:diff;
+    return `<tr>
+      <td><span class="text-muted">${new Date(e.timestamp).toLocaleString()}</span></td>
+      <td><strong>${e.user}</strong></td>
+      <td><span class="badge bg-blue-lt">${e.sku_id}</span></td>
+      <td>${e.field}</td>
+      <td>${e.old_value}</td><td>${e.new_value}</td>
+      <td class="${diffClass} fw-bold">${diffText}</td>
+      <td>${e.reason||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+async function submitAdj(){
+  const data={sku_id:document.getElementById('adj-sku').value,field:document.getElementById('adj-field').value,
+    old_value:parseInt(document.getElementById('adj-old').value)||0,new_value:parseInt(document.getElementById('adj-new').value)||0,
+    reason:document.getElementById('adj-reason').value};
+  if(!data.sku_id){alert('Select a SKU');return;}
+  await fetch('/api/audit-trail/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  bootstrap.Modal.getInstance(document.getElementById('adj-modal')).hide();
+  loadAudit();
+}
+loadAudit();
+</script>
+{% endblock %}

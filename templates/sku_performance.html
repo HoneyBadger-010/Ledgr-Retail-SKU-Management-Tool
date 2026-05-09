@@ -85,6 +85,14 @@ async function init() {
       allSKUs.map(s => `<option value="${s.sku_id}">${s.sku_id} - ${s.product_name}</option>`).join('');
     
     select.addEventListener('change', loadSKUData);
+    
+    // Check URL for ?sku=XYZ
+    const urlParams = new URLSearchParams(window.location.search);
+    const preselectedSku = urlParams.get('sku');
+    if (preselectedSku) {
+      select.value = preselectedSku;
+      loadSKUData();
+    }
   } catch (err) {
     console.error("Failed to load SKUs:", err);
   }

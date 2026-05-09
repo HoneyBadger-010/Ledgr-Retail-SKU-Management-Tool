@@ -208,9 +208,10 @@
 
   <!-- ── TOP BAR ── -->
   <header class="df-topbar">
-    <div class="df-search">
+    <div class="df-search position-relative">
       <i class="ti ti-search"></i>
-      <input type="text" placeholder="Search..." id="global-search">
+      <input type="text" placeholder="Search SKUs or Pages..." id="global-search" autocomplete="off">
+      <div id="search-results" class="dropdown-menu w-100 shadow-sm mt-1 p-0" style="display:none; position:absolute; max-height: 350px; overflow-y:auto; top:100%; left:0; border-radius: 8px;"></div>
     </div>
     <div class="df-topbar-right">
       <div class="df-monday-pill"><span class="dot"></span>Monday Morning Report (Auto-Generated: 08:00 AM IST)</div>
@@ -341,6 +342,59 @@
   function toggleChat(){const w=document.getElementById('chat-window');w.classList.toggle('open');if(w.classList.contains('open'))document.getElementById('chat-input').focus();}
   function formatReply(t){return t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/^- /gm,'• ').replace(/\n/g,'<br>');}
   async function sendChat(){const input=document.getElementById('chat-input');const msg=input.value.trim();if(!msg)return;input.value='';const msgs=document.getElementById('chat-messages');msgs.innerHTML+=`<div class="chat-msg user">${msg}</div>`;msgs.innerHTML+=`<div class="chat-typing" id="typing"><span></span><span></span><span></span></div>`;msgs.scrollTop=msgs.scrollHeight;document.getElementById('chat-send').disabled=true;chatHistory.push({role:'user',content:msg});try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,history:chatHistory})});const d=await r.json();const reply=d.reply||'Sorry, something went wrong.';chatHistory.push({role:'assistant',content:reply});document.getElementById('typing')?.remove();msgs.innerHTML+=`<div class="chat-msg bot">${formatReply(reply)}</div>`;}catch(e){document.getElementById('typing')?.remove();msgs.innerHTML+=`<div class="chat-msg bot">Connection error. Please try again.</div>`;}document.getElementById('chat-send').disabled=false;msgs.scrollTop=msgs.scrollHeight;}
+  
+  // GLOBAL SEARCH LOGIC
+  let allGlobalSKUs = [];
+  async function initGlobalSearch() {
+    try {
+      const res = await fetch('/api/sku-list');
+      allGlobalSKUs = await res.json();
+    } catch(err) { console.error("Global search data failed to load"); }
+    
+    const input = document.getElementById('global-search');
+    const resultsContainer = document.getElementById('search-results');
+    
+    input.addEventListener('input', function() {
+      const q = this.value.toLowerCase().trim();
+      if(q.length < 1) {
+        resultsContainer.style.display = 'none';
+        return;
+      }
+      
+      const matched = allGlobalSKUs.filter(s => 
+        (s.sku_id && s.sku_id.toLowerCase().includes(q)) || 
+        (s.product_name && s.product_name.toLowerCase().includes(q)) ||
+        (s.category && s.category.toLowerCase().includes(q))
+      ).slice(0, 8);
+      
+      if(matched.length === 0) {
+        resultsContainer.innerHTML = '<div class="p-3 text-muted text-center" style="font-size:13px;">No matching SKUs found.</div>';
+      } else {
+        resultsContainer.innerHTML = matched.map(s => `
+          <a href="/sku-performance?sku=${s.sku_id}" class="dropdown-item d-flex align-items-center p-3 border-bottom text-decoration-none">
+            <div class="avatar bg-blue-lt me-3 text-primary fw-bold" style="width:36px;height:36px;font-size:11px;">${s.sku_id.split('-').pop()}</div>
+            <div style="flex:1; overflow:hidden;">
+              <div class="fw-semibold text-truncate" style="color:#1E293B; font-size:13px;">${s.product_name}</div>
+              <div class="text-muted text-truncate" style="font-size:11px;">${s.sku_id} &bull; ${s.category.replace('_',' ')}</div>
+            </div>
+          </a>
+        `).join('');
+      }
+      resultsContainer.style.display = 'block';
+    });
+    
+    document.addEventListener('click', function(e) {
+      if(!input.contains(e.target) && !resultsContainer.contains(e.target)) {
+        resultsContainer.style.display = 'none';
+      }
+    });
+    
+    input.addEventListener('focus', function() {
+      if(this.value.trim().length > 0) resultsContainer.style.display = 'block';
+    });
+  }
+  
+  document.addEventListener("DOMContentLoaded", initGlobalSearch);
   </script>
 </body>
 </html>

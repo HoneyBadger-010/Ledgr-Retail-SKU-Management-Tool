@@ -613,16 +613,6 @@ Issues and feature requests welcome at https://github.com/HoneyBadger-010/Ledgr-
 
 ---
 
-## 👨‍💻 Author
-
-<div align="center">
-
-[![GitHub](https://img.shields.io/badge/GitHub-Ashutosh--Chaudhari-181717?logo=github)](https://github.com/Ashutosh-Chaudhari)
-
-</div>
-
----
-
 ## 📄 License
 
 Released under the **MIT License** — see `LICENSE` for details.

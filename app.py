@@ -22,6 +22,33 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", "sunrise-dev-key-change-in-p
 if app.secret_key == "sunrise-dev-key-change-in-prod" and os.environ.get("FLASK_ENV") == "production":
     raise RuntimeError("FLASK_SECRET_KEY must be set in production (refusing to start with default key)")
 
+# Production security headers
+if os.environ.get("FLASK_ENV") == "production":
+    app.config.update(
+        SESSION_COOKIE_SECURE=True,
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE='Lax',
+        PERMANENT_SESSION_LIFETIME=timedelta(hours=12),
+    )
+    
+    @app.after_request
+    def set_security_headers(response):
+        """Add security headers for production"""
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+        response.headers['X-XSS-Protection'] = '1; mode=block'
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+        response.headers['Content-Security-Policy'] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
+            "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; "
+            "img-src 'self' data: https:; "
+            "connect-src 'self' https://world.openfoodfacts.org; "
+            "frame-ancestors 'self';"
+        )
+        return response
+
 # Auth integration (Brief Part 2B) — register blueprint BEFORE init_csrf so
 # the login route is in the view_functions registry when CSRF check runs.
 from auth import auth_bp, init_auth, init_csrf, role_required

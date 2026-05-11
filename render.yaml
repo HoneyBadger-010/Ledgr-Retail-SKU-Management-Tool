@@ -1,0 +1,134 @@
+# Render Blueprint for Ledgr - Production Deployment
+# This file configures all services needed for production deployment on Render
+
+services:
+  # PostgreSQL Database
+  - type: pserv
+    name: ledgr-db
+    env: docker
+    plan: starter  # Upgrade to standard/pro for production
+    region: oregon  # Change to your preferred region
+    dockerfilePath: ./Dockerfile.postgres
+    envVars:
+      - key: POSTGRES_DB
+        value: ledgr_prod
+      - key: POSTGRES_USER
+        value: ledgr_prod
+      - key: POSTGRES_PASSWORD
+        generateValue: true  # Auto-generates secure password
+    disk:
+      name: ledgr-db-data
+      mountPath: /var/lib/postgresql/data
+      sizeGB: 10  # Adjust based on your needs
+
+  # Main Web Application
+  - type: web
+    name: ledgr-web
+    env: docker
+    plan: starter  # Upgrade to standard/pro for production
+    region: oregon  # Change to your preferred region
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /login
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ledgr-db
+          property: connectionString
+      - key: FLASK_SECRET_KEY
+        generateValue: true  # Auto-generates secure secret
+      - key: FLASK_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: PYTHONUNBUFFERED
+        value: 1
+      - key: OPENROUTER_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: LEDGR_PUBLIC_HOST
+        sync: false  # Set to your Render URL
+      - key: HIDE_DEMO_CREDENTIALS
+        value: 1
+      # Optional: Notification services (set in Render dashboard)
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_WHATSAPP_FROM
+        sync: false
+      - key: OWNER_WHATSAPP_TO
+        sync: false
+      - key: MAIL_SERVER
+        sync: false
+      - key: MAIL_PORT
+        value: 587
+      - key: MAIL_USE_TLS
+        value: true
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: OWNER_EMAIL
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+      # Demo account passwords (change these!)
+      - key: DEMO_OWNER_PASSWORD
+        sync: false
+      - key: DEMO_MANAGER_PASSWORD
+        sync: false
+      - key: DEMO_SALESMAN_PASSWORD
+        sync: false
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 4 -b 0.0.0.0:5000 --preload --access-logfile - --error-logfile - --timeout 120 --max-requests 1000 --max-requests-jitter 50 app:app
+
+  # Background Scheduler Worker
+  - type: worker
+    name: ledgr-scheduler
+    env: docker
+    plan: starter
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ledgr-db
+          property: connectionString
+      - key: FLASK_SECRET_KEY
+        fromService:
+          name: ledgr-web
+          envVarKey: FLASK_SECRET_KEY
+      - key: FLASK_ENV
+        value: production
+      - key: OPENROUTER_KEY
+        sync: false
+      # Notification services
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_WHATSAPP_FROM
+        sync: false
+      - key: OWNER_WHATSAPP_TO
+        sync: false
+      - key: MAIL_SERVER
+        sync: false
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: OWNER_EMAIL
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+    buildCommand: pip install -r requirements.txt
+    startCommand: python scheduler.py
+
+databases:
+  - name: ledgr-db
+    databaseName: ledgr_prod
+    user: ledgr_prod
+    plan: starter  # Upgrade to standard/pro for production

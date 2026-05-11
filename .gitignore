@@ -1,43 +1,120 @@
 # Python
 __pycache__/
-*.pyc
-*.pyo
-*.egg-info/
-.pytest_cache/
-.mypy_cache/
-
-# Local Python env / build
-venv/
-.venv/
-dist/
+*.py[cod]
+*$py.class
+*.so
+.Python
 build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# Local secrets and runtime state
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
+
+# Environment Variables - CRITICAL: Never commit secrets!
 .env
 .env.local
+.env.production
+.env.*.local
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
 sunrise.db
+
+# Logs
+logs/
 *.log
+pip-log.txt
+pip-delete-this-directory.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Data files (may contain sensitive information)
 data/processed/
 data/uploads/
-data/*.bak
-logs/
+data/*.csv
+!data/sku_master.csv
+!data/outlet_master.csv
+!data/inventory_snapshot.csv
+!data/festive_calendar.csv
+!data/promotions_calendar.csv
 
-# Auto-generated docs
-docs/
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
 
-# Source-of-truth assets live in static/images/ — keep root clean
-/ledgr brand.png
-/logo.png
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
 
-# Android build artifacts
-android/.gradle/
-android/build/
-android/app/build/
-android/app/release/
-android/captures/
-android/local.properties
-android/.kotlin/
+# Docker
+.dockerignore
+
+# Render
+.render/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Temporary files
+tmp/
+temp/
+*.tmp
 
 # OS
-.DS_Store
 Thumbs.db
+.DS_Store
+
+# Android
+android/.gradle/
+android/local.properties
+android/.idea/
+android/build/
+android/app/build/
+android/captures/
+android/.externalNativeBuild/
+android/.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Secrets and credentials - NEVER COMMIT THESE!
+*secret*
+*password*
+*credentials*
+*token*
+*key.json
+*key.pem
+*.p12
+*.pfx

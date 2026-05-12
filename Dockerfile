@@ -42,12 +42,12 @@ RUN groupadd --system --gid 1001 ledgr && \
 # Switch to non-root user
 USER ledgr
 
-# Expose port
-EXPOSE 5000
+# Expose port (Railway sets PORT env variable dynamically)
+EXPOSE ${PORT:-5000}
 
 # Health check for container orchestration
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -fsS "http://127.0.0.1:${PORT}/login" >/dev/null || exit 1
+  CMD curl -fsS "http://127.0.0.1:${PORT:-5000}/login" >/dev/null || exit 1
 
 # Production-optimized Gunicorn configuration
 # - Workers: 4 (adjust based on CPU cores: 2-4 x cores)
@@ -57,16 +57,17 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 # - Timeout: 120s for long-running pipeline operations
 # - Access log: Stream to stdout for container logging
 # - Error log: Stream to stderr for container logging
-CMD ["gunicorn", \
-     "--workers", "4", \
-     "--bind", "0.0.0.0:5000", \
-     "--preload", \
-     "--max-requests", "1000", \
-     "--max-requests-jitter", "50", \
-     "--timeout", "120", \
-     "--access-logfile", "-", \
-     "--error-logfile", "-", \
-     "--log-level", "info", \
-     "--worker-class", "sync", \
-     "--worker-tmp-dir", "/dev/shm", \
-     "app:app"]
+# Railway sets PORT dynamically, so we use it instead of hardcoding 5000
+CMD gunicorn \
+     --workers 4 \
+     --bind 0.0.0.0:${PORT:-5000} \
+     --preload \
+     --max-requests 1000 \
+     --max-requests-jitter 50 \
+     --timeout 120 \
+     --access-logfile - \
+     --error-logfile - \
+     --log-level info \
+     --worker-class sync \
+     --worker-tmp-dir /dev/shm \
+     app:app

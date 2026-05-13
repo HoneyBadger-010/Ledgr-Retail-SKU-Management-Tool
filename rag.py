@@ -185,6 +185,8 @@ def _build_supplier_chunks():
         from sqlalchemy import create_engine, text
         import numpy as np
         db_uri = os.environ.get("DATABASE_URL", f"sqlite:///{os.path.join(ROOT, 'sunrise.db')}")
+        if db_uri.startswith("postgres://"):
+            db_uri = "postgresql://" + db_uri[len("postgres://"):]
         eng = create_engine(db_uri, future=True)
         with eng.connect() as conn:
             rows = conn.execute(text("""
@@ -234,6 +236,8 @@ def _build_batch_chunks():
         from sqlalchemy import create_engine, text
         from datetime import date
         db_uri = os.environ.get("DATABASE_URL", f"sqlite:///{os.path.join(ROOT, 'sunrise.db')}")
+        if db_uri.startswith("postgres://"):
+            db_uri = "postgresql://" + db_uri[len("postgres://"):]
         eng = create_engine(db_uri, future=True)
         with eng.connect() as conn:
             rows = conn.execute(text("""
@@ -278,6 +282,8 @@ def _build_po_chunks():
     try:
         from sqlalchemy import create_engine, text
         db_uri = os.environ.get("DATABASE_URL", f"sqlite:///{os.path.join(ROOT, 'sunrise.db')}")
+        if db_uri.startswith("postgres://"):
+            db_uri = "postgresql://" + db_uri[len("postgres://"):]
         eng = create_engine(db_uri, future=True)
         with eng.connect() as conn:
             rows = conn.execute(text("""
@@ -322,6 +328,8 @@ def _build_pipeline_chunks():
     try:
         from sqlalchemy import create_engine, text
         db_uri = os.environ.get("DATABASE_URL", f"sqlite:///{os.path.join(ROOT, 'sunrise.db')}")
+        if db_uri.startswith("postgres://"):
+            db_uri = "postgresql://" + db_uri[len("postgres://"):]
         eng = create_engine(db_uri, future=True)
         with eng.connect() as conn:
             rows = conn.execute(text("""

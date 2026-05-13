@@ -41,6 +41,8 @@ def main():
     print(f"[accuracy] Logging actuals for week {target_date.date()} ({len(fc_for_week)} SKUs)")
 
     db_uri = os.environ.get("DATABASE_URL", f"sqlite:///{os.path.join(ROOT, 'sunrise.db')}")
+    if db_uri.startswith("postgres://"):
+        db_uri = "postgresql://" + db_uri[len("postgres://"):]
     eng = create_engine(db_uri, future=True)
     inserted = 0
     skipped = 0

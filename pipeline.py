@@ -62,6 +62,8 @@ def export_db_to_csv_standalone(logger):
         root = get_project_root()
         db_uri = os.environ.get("DATABASE_URL",
                                 f"sqlite:///{os.path.join(root, 'sunrise.db')}")
+        if db_uri.startswith("postgres://"):
+            db_uri = "postgresql://" + db_uri[len("postgres://"):]
         eng = create_engine(db_uri, future=True)
         data_dir = os.path.join(root, "data")
         with eng.connect() as conn:

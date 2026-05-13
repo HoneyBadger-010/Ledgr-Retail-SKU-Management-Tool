@@ -26,6 +26,11 @@ def init_db(app):
     """Initialize SQLAlchemy with the Flask app and seed from CSVs."""
     db_uri = os.environ.get("DATABASE_URL",
         f"sqlite:///{os.path.join(ROOT, 'sunrise.db')}")
+    # Railway, Heroku, and a few other hosts hand out the legacy "postgres://"
+    # scheme. SQLAlchemy 2.x only accepts "postgresql://" — normalize so the
+    # platform-supplied env var works without manual editing.
+    if db_uri.startswith("postgres://"):
+        db_uri = "postgresql://" + db_uri[len("postgres://"):]
     app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.init_app(app)

@@ -803,12 +803,13 @@ def api_chat():
     if not user_msg:
         return jsonify({"error": "No message"}), 400
 
-    # Try OpenRouter AI first
-    try:
-        context = build_data_context(query=user_msg)
-        # Pull live counts so the system prompt isn't lying about scale.
-        sku_count, outlet_count = _live_counts()
-        system_prompt = f"""You are Ledgr, the demand-forecasting AI assistant for Sunrise Consumer Goods (FMCG distributor, Pune & Nashik, {outlet_count} outlets, {sku_count} SKUs).
+    # Try OpenRouter AI first (only if API key is configured)
+    if OPENROUTER_KEY:
+        try:
+            context = build_data_context(query=user_msg)
+            # Pull live counts so the system prompt isn't lying about scale.
+            sku_count, outlet_count = _live_counts()
+            system_prompt = f"""You are Ledgr, the demand-forecasting AI assistant for Sunrise Consumer Goods (FMCG distributor, Pune & Nashik, {outlet_count} outlets, {sku_count} SKUs).
 
 You have access to the full operational data of the system. You can answer questions about ANY of these areas:
 
@@ -828,25 +829,25 @@ Read the data below carefully and answer the user's question directly using what
 {context}
 === END DATA ==="""
 
-        messages = [{"role": "system", "content": system_prompt}]
-        for h in history[-6:]:
-            messages.append({"role": h.get("role", "user"), "content": h.get("content", "")})
-        messages.append({"role": "user", "content": user_msg})
+            messages = [{"role": "system", "content": system_prompt}]
+            for h in history[-6:]:
+                messages.append({"role": h.get("role", "user"), "content": h.get("content", "")})
+            messages.append({"role": "user", "content": user_msg})
 
-        resp = http_requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers={"Authorization": f"Bearer {OPENROUTER_KEY}", "Content-Type": "application/json"},
-            json={"model": "google/gemini-2.0-flash-001", "messages": messages, "max_tokens": 1500, "temperature": 0.3},
-            timeout=30
-        )
-        result = resp.json()
-        reply = result.get("choices", [{}])[0].get("message", {}).get("content", "")
-        if reply:
-            return jsonify({"reply": reply})
-    except Exception:
-        pass
+            resp = http_requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={"Authorization": f"Bearer {OPENROUTER_KEY}", "Content-Type": "application/json"},
+                json={"model": "google/gemini-2.0-flash-001", "messages": messages, "max_tokens": 1500, "temperature": 0.3},
+                timeout=30
+            )
+            result = resp.json()
+            reply = result.get("choices", [{}])[0].get("message", {}).get("content", "")
+            if reply:
+                return jsonify({"reply": reply})
+        except Exception as e:
+            print(f"[chat] OpenRouter failed: {e}, falling back to local engine")
 
-    # Fallback to local engine
+    # Fallback to local engine (works without API key)
     pipeline_data = get_data_cache()
     reply = answer_query(user_msg, pipeline_data)
     return jsonify({"reply": reply})

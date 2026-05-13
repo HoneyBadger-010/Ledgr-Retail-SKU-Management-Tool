@@ -1524,6 +1524,9 @@ def inject_globals():
     }
 
 os.makedirs("logs", exist_ok=True)
+os.makedirs(PROCESSED, exist_ok=True)
+os.makedirs(DATA, exist_ok=True)
+
 # First-boot pipeline auto-run: writes monday_report.json + companion files
 # to data/processed/ if they aren't there yet. ensure_pipeline() is a no-op
 # if outputs already exist, so this is safe to run on every import. With
@@ -1531,9 +1534,13 @@ os.makedirs("logs", exist_ok=True)
 # The Dockerfile sets --timeout 120 to cover the ~45-60s first-boot pipeline.
 if os.environ.get("LEDGR_SKIP_AUTO_PIPELINE", "").lower() not in ("1", "true", "yes"):
     try:
+        print("[boot] Checking if pipeline needs to run...")
         ensure_pipeline()
+        print("[boot] Pipeline check complete")
     except Exception as _e:
         print(f"[boot] ensure_pipeline failed (non-fatal): {_e}")
+        import traceback
+        traceback.print_exc()
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)

@@ -1527,19 +1527,23 @@ os.makedirs(PROCESSED, exist_ok=True)
 os.makedirs(DATA, exist_ok=True)
 
 # First-boot pipeline auto-run: writes monday_report.json + companion files
-# to data/processed/ if they aren't there yet. ensure_pipeline() is a no-op
-# if outputs already exist, so this is safe to run on every import. With
-# gunicorn --preload it fires once in the master process, not per-worker.
-# The Dockerfile sets --timeout 120 to cover the ~45-60s first-boot pipeline.
+# to data/processed/ if they aren't there yet. Pushed to a daemon thread so
+# gunicorn binds + serves /login within the platform healthcheck window
+# (Railway = 300s; the pipeline itself can take 45-90s during which we want
+# the app already responsive). ensure_pipeline() is a no-op when outputs
+# already exist, so subsequent boots are instant.
 if os.environ.get("LEDGR_SKIP_AUTO_PIPELINE", "").lower() not in ("1", "true", "yes"):
-    try:
-        print("[boot] Checking if pipeline needs to run...")
-        ensure_pipeline()
-        print("[boot] Pipeline check complete")
-    except Exception as _e:
-        print(f"[boot] ensure_pipeline failed (non-fatal): {_e}")
-        import traceback
-        traceback.print_exc()
+    import threading
+    def _boot_pipeline():
+        try:
+            print("[boot-bg] Checking if pipeline needs to run...")
+            ensure_pipeline()
+            print("[boot-bg] Pipeline check complete")
+        except Exception as _e:
+            print(f"[boot-bg] ensure_pipeline failed (non-fatal): {_e}")
+            import traceback
+            traceback.print_exc()
+    threading.Thread(target=_boot_pipeline, name="ledgr-boot-pipeline", daemon=True).start()
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)

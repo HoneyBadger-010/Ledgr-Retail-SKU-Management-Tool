@@ -58,4 +58,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 # - Access log: Stream to stdout for container logging
 # - Error log: Stream to stderr for container logging
 # Railway sets PORT dynamically, so we use shell form to expand $PORT variable
-CMD /bin/sh -c "gunicorn --workers 4 --bind 0.0.0.0:${PORT:-5000} --preload --max-requests 1000 --max-requests-jitter 50 --timeout 120 --access-logfile - --error-logfile - --log-level info --worker-class sync --worker-tmp-dir /dev/shm app:app"
+CMD /bin/sh -c "gunicorn --workers ${WEB_CONCURRENCY:-2} --bind 0.0.0.0:${PORT:-5000} --preload --max-requests 1000 --max-requests-jitter 50 --timeout 120 --access-logfile - --error-logfile - --log-level info --worker-class sync --worker-tmp-dir /dev/shm app:app"

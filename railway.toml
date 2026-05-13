@@ -9,6 +9,6 @@ dockerfilePath = "Dockerfile"
 # No startCommand - let Dockerfile's CMD handle it
 # This allows proper shell variable expansion for $PORT
 healthcheckPath = "/login"
-healthcheckTimeout = 100
+healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10

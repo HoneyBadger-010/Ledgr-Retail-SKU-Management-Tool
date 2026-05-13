@@ -23,7 +23,12 @@ PROCESSED = os.path.join(ROOT, "data", "processed")
 
 
 def init_db(app):
-    """Initialize SQLAlchemy with the Flask app and seed from CSVs."""
+    """Initialize SQLAlchemy with the Flask app. Schema is created synchronously
+    (cheap — empty tables), but the 93K-row CSV seed is deferred to a background
+    thread so gunicorn binds + serves /login within the platform healthcheck
+    window. The demo login still works during seeding because DEMO_USERS is
+    in-memory; dashboard data pages just render empty until the seed completes.
+    """
     db_uri = os.environ.get("DATABASE_URL",
         f"sqlite:///{os.path.join(ROOT, 'sunrise.db')}")
     # Railway, Heroku, and a few other hosts hand out the legacy "postgres://"
@@ -31,14 +36,35 @@ def init_db(app):
     # platform-supplied env var works without manual editing.
     if db_uri.startswith("postgres://"):
         db_uri = "postgresql://" + db_uri[len("postgres://"):]
+    # Redact the credentials portion before printing.
+    redacted = db_uri.split("@")[-1] if "@" in db_uri else db_uri
+    print(f"[init_db] connecting to: ...@{redacted}", flush=True)
     app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.init_app(app)
     with app.app_context():
+        print("[init_db] creating tables...", flush=True)
         db.create_all()
+        print("[init_db] adding missing GST/supplier columns...", flush=True)
         _ensure_gst_columns()
-        _seed_if_empty()
-    logger.info(f"Database initialized: {db_uri}")
+        print("[init_db] schema ready", flush=True)
+
+    def _bg_seed():
+        with app.app_context():
+            try:
+                print("[init_db-bg] seeding from CSVs...", flush=True)
+                _seed_if_empty()
+                print("[init_db-bg] seed complete", flush=True)
+            except Exception as e:
+                print(f"[init_db-bg] seed failed (non-fatal): {e}", flush=True)
+                import traceback; traceback.print_exc()
+
+    if os.environ.get("LEDGR_SYNC_SEED", "").lower() in ("1", "true", "yes"):
+        _bg_seed()
+    else:
+        import threading
+        threading.Thread(target=_bg_seed, name="ledgr-bg-seed", daemon=True).start()
+    logger.info(f"Database initialized: {redacted}")
 
 
 def _ensure_gst_columns():

@@ -6,7 +6,8 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "gunicorn --workers 4 --bind 0.0.0.0:$PORT --preload --max-requests 1000 --max-requests-jitter 50 --timeout 120 --access-logfile - --error-logfile - --log-level info --worker-class sync --worker-tmp-dir /dev/shm app:app"
+# No startCommand - let Dockerfile's CMD handle it
+# This allows proper shell variable expansion for $PORT
 healthcheckPath = "/login"
 healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"

@@ -1513,8 +1513,7 @@ def api_audit_add():
 def inject_globals():
     ai_mode = "openrouter" if OPENROUTER_KEY else "local"
     sku_count, outlet_count = _live_counts()
-    show_demo_creds = os.environ.get("FLASK_ENV", "development") != "production" \
-                       and os.environ.get("HIDE_DEMO_CREDENTIALS", "").lower() not in ("1", "true", "yes")
+    show_demo_creds = os.environ.get("HIDE_DEMO_CREDENTIALS", "").lower() not in ("1", "true", "yes")
     return {
         "ai_mode": ai_mode,
         "app_version": "2.0.0",

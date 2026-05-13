@@ -31,6 +31,8 @@
     .demo-account .role-manager { background: #DBEAFE; color: #1D4ED8; }
     .demo-account .role-salesman { background: #FEF3C7; color: #92400E; }
     .demo-account .email { color: #475569; font-size: 11px; }
+    .demo-account .password { color: #0F172A; font-size: 11px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 4px; padding: 1px 6px; margin-left: auto; }
+    .demo-account .creds-stack { display: flex; flex-direction: column; gap: 2px; flex: 1; }
     .alert { border-radius: 8px; font-size: 13px; }
     .pwd-toggle-wrap { position: relative; }
     .pwd-toggle { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: 0; color: #94A3B8; cursor: pointer; padding: 4px 8px; }
@@ -79,16 +81,19 @@
           <div class="demo-account" onclick="fillLogin('owner@sunrise.com','sunrise2024')">
             <span class="role-pill role-owner">Owner</span>
             <span class="email">owner@sunrise.com</span>
+            <span class="password">sunrise2024</span>
           </div>
           <div class="demo-account" onclick="fillLogin('manager@sunrise.com','manager2024')">
             <span class="role-pill role-manager">Manager</span>
             <span class="email">manager@sunrise.com</span>
+            <span class="password">manager2024</span>
           </div>
           <div class="demo-account" onclick="fillLogin('salesman@sunrise.com','sales2024')">
             <span class="role-pill role-salesman">Salesman</span>
             <span class="email">salesman@sunrise.com</span>
+            <span class="password">sales2024</span>
           </div>
-          <div style="margin-top:8px;font-size:10px;color:#94A3B8;text-align:center"><i class="ti ti-info-circle me-1"></i>Click a row to autofill. Hidden in production.</div>
+          <div style="margin-top:8px;font-size:10px;color:#94A3B8;text-align:center"><i class="ti ti-info-circle me-1"></i>Click a row to autofill — or type the password shown. Hidden in production.</div>
         </div>
         {% endif %}
       </div>

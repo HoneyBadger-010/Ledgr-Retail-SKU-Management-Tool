@@ -73,8 +73,11 @@ def _seed_if_empty():
     """Seed PostgreSQL tables from CSVs if they are empty."""
     # Only seed if SKU table is empty (first run)
     if SKU.query.first() is not None:
+        logger.info("Database already seeded - skipping")
         return
-    logger.info("Seeding database from CSV files...")
+    logger.info("=" * 60)
+    logger.info("SEEDING DATABASE FROM CSV FILES")
+    logger.info("=" * 60)
 
     # 1. Default store (Pune is in Maharashtra; set state for GST compliance)
     store = Store(id='store-pune-001', name='Sunrise Pune', city='Pune',
@@ -150,7 +153,20 @@ def _seed_if_empty():
     _backfill_gst_supplier_defaults()
 
     db.session.commit()
-    logger.info("Database seeding complete.")
+    
+    # Verify seeding was successful
+    sku_count = SKU.query.count()
+    outlet_count = Outlet.query.count()
+    store_count = Store.query.count()
+    logger.info("=" * 60)
+    logger.info("DATABASE SEEDING COMPLETE")
+    logger.info("=" * 60)
+    logger.info(f"Loaded: {store_count} stores, {sku_count} SKUs, {outlet_count} outlets")
+    
+    if sku_count == 0:
+        logger.error("WARNING: No SKUs were loaded! Check CSV files in data/ directory")
+    else:
+        logger.info("✓ Database seeding successful")
 
 
 _CATEGORY_HSN = {

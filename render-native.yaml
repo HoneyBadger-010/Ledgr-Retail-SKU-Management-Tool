@@ -11,6 +11,8 @@ services:
     buildCommand: "./build.sh"
     startCommand: "./start.sh"
     healthCheckPath: /login
+    # Ensure database is seeded on every deployment
+    preDeployCommand: python init_production_db.py
     envVars:
       - key: DATABASE_URL
         fromDatabase:
